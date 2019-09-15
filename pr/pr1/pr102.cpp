@@ -3,12 +3,15 @@
 
 using namespace std;
 
-void main()
+int main()
 {
   int a, b, c;
+
   while(cin >> a >> b)
   {
-    cout << typeid(a).name() << ", " << tyepid(b).name() << ", " << typeid(c).name() << endl;
+    cout << typeid(a).name() << endl;
+    cout << typeid(b).name() << endl;
+    cout << typeid(c).name() << endl;
 
     int *p = &a;
     int *q = &b;
@@ -37,4 +40,7 @@ void main()
     cout << "=========" << endl;
 
   }
+
+  return 0;
+
 }
