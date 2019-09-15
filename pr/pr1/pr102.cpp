@@ -17,9 +17,9 @@ int main()
     int *q = &b;
     int *r = &c;
 
-    int d = *p;
-    int e = *q;
-    int f = *r;
+    int &d = *p; //if it is not referring, it wont change with a, b, c
+    int &e = *q;
+    int &f = *r;
     //Try to print out a,b,c’s memory addresses.
     cout << "&a = " << p << endl;
     cout << "&b = " << q << endl;
@@ -31,12 +31,15 @@ int main()
     //Operate on these variables. Print out their memory addresses and contents again.
     c = a + b;
     cout << "---------" << endl;
+    cout << "a = " << a << endl;
+    cout << "b = " << b << endl;
+    cout << "c = " << c << endl;
     cout << "&a = " << p << endl;
     cout << "&b = " << q << endl;
     cout << "&c = " << r << endl;
     cout << "content@ &a: " << d << endl;
     cout << "content@ &b: " << e << endl;
-    cout << "content@ &c:" << f << endl;
+    cout << "content@ &c: " << f << endl;
     cout << "=========" << endl;
 
   }
