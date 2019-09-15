@@ -15,7 +15,7 @@ int main(int argc, char const *argv[]) {
   cout << "*p@: " << &p << endl;
   //Print out the contents of these memory addresses.
   cout << "a = " << a << endl;
-  cout << "p = " << *p << endl;
+  cout << "p = " << p << endl;
 
   return 0;
 }
