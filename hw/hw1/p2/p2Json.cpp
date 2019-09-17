@@ -47,6 +47,7 @@ void Json::help() {
   cout << endl;
   cout << "Options:\t" << "Descriptions:" << endl;
   cout << "AVG\t\t"    << "show the average of values in the file." << endl;
+  cout << "EXIT\t\t"   << "exit." << endl;
   cout << "HELP\t\t"   << "show what I can do for you." << endl;
   cout << "MAX\t\t"    << "show the maximum of values." << endl;
   cout << "MIN\t\t"    << "show the minimum of values." << endl;
@@ -56,13 +57,18 @@ void Json::help() {
 }
 
 void elem_str(JsonElem elem) {
-  cout << "\"" << elem.k_str() << "\" : " << elem.v_str() << "," << endl;
+  cout << "  \"" << elem.k_str() << "\" : " << elem.v_str() << "," << endl;
+}
+
+void lastElem_str(JsonElem elem) {
+  cout << "  \"" << elem.k_str() << "\" : " << elem.v_str() << endl;
 }
 
 void Json::print() {
   cout << "{" << endl;
-  for_each(_obj.begin(), _obj.end(), elem_str);
-  cout << "}" >> endl;
+  for_each(_obj.begin(), _obj.end()-1, elem_str);
+  for_each(_obj.end()-1, _obj.end()  , lastElem_str);
+  cout << "}" << endl;
 }
 
 

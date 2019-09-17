@@ -17,6 +17,7 @@ using namespace std;
 class JsonElem
 {
 public:
+  
    // TODO: define constructor & member functions on your own
    JsonElem() {}
    JsonElem(const string& k, int v): _key(k), _value(v) {}
@@ -33,9 +34,12 @@ private:
 class Json
 {
 public:
+
    // TODO: define constructor & member functions on your own
    bool read(const string&);
    void help();
+   void print();
+
 private:
    vector<JsonElem>       _obj;  // DO NOT change this definition.
                                  // Use it to store JSON elements.
