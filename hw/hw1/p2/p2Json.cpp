@@ -55,6 +55,18 @@ void Json::help() {
   cout << endl;
 }
 
+void elem_str(JsonElem elem) {
+  cout << "\"" << elem.k_str() << "\" : " << elem.v_str() << "," << endl;
+}
+
+void Json::print() {
+  cout << "{" << endl;
+  for_each(_obj.begin(), _obj.end(), elem_str);
+  cout << "}" >> endl;
+}
+
+
+
 ostream& operator << (ostream& os, const JsonElem& j) {
    return (os << "\"" << j._key << "\" : " << j._value);
 }

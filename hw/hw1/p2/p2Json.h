@@ -20,6 +20,8 @@ public:
    // TODO: define constructor & member functions on your own
    JsonElem() {}
    JsonElem(const string& k, int v): _key(k), _value(v) {}
+   string k_str() { return _key; }
+   string v_str() { return to_string(_value); }
 
    friend ostream& operator << (ostream&, const JsonElem&);
 
