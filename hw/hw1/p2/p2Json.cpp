@@ -42,11 +42,14 @@ bool Json::read(const string& jsonFile) {
      }
      c = file.get();
    }
+   file.close();
+   return false;
 }
 
 void Json::help() {
   cout << endl;
   cout << "Options:\t" << "Descriptions:" << endl;
+  cout << "ADD\t\t"    << "add a temporary pair." << endl;
   cout << "AVG\t\t"    << "show the average of values in the file." << endl;
   cout << "EXIT\t\t"   << "exit." << endl;
   cout << "HELP\t\t"   << "show what I can do for you." << endl;
