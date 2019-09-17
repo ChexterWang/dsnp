@@ -27,7 +27,7 @@ bool Json::read(const string& jsonFile) {
      vector<char>::iterator it;
      it = find(escape.begin(), escape.end(), c);
      if(c == '"') inKey = !inKey;
-     else if((c == ',') || (c == '}')){
+     else if(((c == ',') || (c == '}')) && keyTemp != "" && valueTemp != ""){
        JsonElem elem(keyTemp, stoi(valueTemp));
        _obj.push_back(elem);
      }
@@ -66,8 +66,10 @@ void lastElem_str(JsonElem elem) {
 
 void Json::print() {
   cout << "{" << endl;
-  for_each(_obj.begin(), _obj.end()-1, elem_str);
-  for_each(_obj.end()-1, _obj.end()  , lastElem_str);
+  if(_obj.size() > 0){
+    for_each(_obj.begin(), _obj.end()-1, elem_str);
+    for_each(_obj.end()-1, _obj.end()  , lastElem_str);
+  }
   cout << "}" << endl;
 }
 
