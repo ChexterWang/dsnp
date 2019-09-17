@@ -29,6 +29,10 @@ int main()
    // TODO read and execute commands
    // cout << "Enter command: ";
    while (true) {
-      // cout << "Enter command: ";
+      cout << "Enter command: ";
+      string cmd;
+      cin >> cmd;
+      if(!cmd.compare("EXIT")) exit(0);
+      if(!cmd.compare("HELP")) exit(0);
    }
 }
