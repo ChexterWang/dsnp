@@ -36,11 +36,12 @@ bool Json::read(const string& jsonFile) {
        if(inKey) keyTemp += string(1, c);
        else valueTemp += string(1, c);
      }
-     if(c == '}') return true;
+     if(c == '}'){
+       file.close();
+       return true;
+     }
      c = file.get();
    }
-   file.close();
-   return true;
 }
 
 void Json::help() {
