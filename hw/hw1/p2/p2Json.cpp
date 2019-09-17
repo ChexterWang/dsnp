@@ -7,25 +7,43 @@
 ****************************************************************************/
 #include <iostream>
 #include <string>
-#include <ifstream>
-
+#include <fstream>
+#include <vector>
+#include <algorithm>
 #include "p2Json.h"
 
 using namespace std;
 
 // Implement member functions of class Row and Table here
-bool Json::read(const string& jsonFile){
+bool Json::read(const string& jsonFile) {
    ifstream file(jsonFile);
    char c = file.get();
+   char esc[] = {'\n', '\t', '\r', '\b', '\0', '\\', '\'', ' ', '{', ':'};
+   bool inKey = false;
+   string keyTemp = "";
+   string valueTemp = "";
    while(file.good()){
-     cout << c;
+     vector<char> escape(esc, esc+10);
+     vector<char>::iterator it;
+     it = find(escape.begin(), escape.end(), c);
+     if(c == '"') inKey = !inKey;
+     else if((c == ',') || (c == '}')){
+       JsonElem elem(keyTemp, stoi(valueTemp));
+       _obj.push_back(elem);
+     }
+     // find: if c is not in esc[], "it" will reach the end.
+     else if(it == escape.end()){
+       if(inKey) keyTemp += string(1, c);
+       else valueTemp += string(1, c);
+     }
+     if(c == '}') return true;
      c = file.get();
    }
    file.close();
    return true;
 }
 
-void Json::help(){
+void Json::help() {
   cout << endl;
   cout << "Options:\t" << "Descriptions:" << endl;
   cout << "AVG\t\t"    << "show the average of values in the file." << endl;
@@ -37,8 +55,6 @@ void Json::help(){
   cout << endl;
 }
 
-ostream&
-operator << (ostream& os, const JsonElem& j)
-{
+ostream& operator << (ostream& os, const JsonElem& j) {
    return (os << "\"" << j._key << "\" : " << j._value);
 }
