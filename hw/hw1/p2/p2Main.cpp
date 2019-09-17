@@ -33,6 +33,5 @@ int main()
       string cmd;
       cin >> cmd;
       if(!cmd.compare("EXIT")) exit(0);
-      if(!cmd.compare("HELP")) exit(0);
-   }
+      if(!cmd.compare("HELP")) json.help();
 }

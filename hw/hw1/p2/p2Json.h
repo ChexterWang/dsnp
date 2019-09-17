@@ -33,7 +33,7 @@ class Json
 public:
    // TODO: define constructor & member functions on your own
    bool read(const string&);
-
+   void help();
 private:
    vector<JsonElem>       _obj;  // DO NOT change this definition.
                                  // Use it to store JSON elements.
