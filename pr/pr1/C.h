@@ -3,5 +3,5 @@ public:
   C();
 
 private:
-  int a[6]; 
-}
+  int a[6];
+};
