@@ -15,7 +15,6 @@ int main()
 {
    Json json;
 
-   // Read in the csv file. Do NOT change this part of code.
    string jsonFile;
    cout << "Please enter the file name: ";
    cin >> jsonFile;
@@ -28,7 +27,6 @@ int main()
 
    // TODO read and execute commands
    string cmd = "";
-   string mathMode = "AVG/MAX/MIN/SUM";
    cout << "Enter command: ";
    while (getline(cin, cmd, '\n')) {
       if(!cmd.compare("EXIT")) exit(0);

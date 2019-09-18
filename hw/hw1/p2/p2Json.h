@@ -18,7 +18,6 @@ class JsonElem
 {
 public:
 
-   // TODO: define constructor & member functions on your own
    JsonElem() {}
    JsonElem(const string& k, int v): _key(k), _value(v) {}
    int getValue();
@@ -35,7 +34,6 @@ class Json
 {
 public:
 
-   // TODO: define constructor & member functions on your own
    bool read(const string&);
    void help();
    void print();
@@ -46,8 +44,9 @@ public:
    void sum();
 
 private:
-   vector<JsonElem>       _obj;  // DO NOT change this definition.
-                                 // Use it to store JSON elements.
+  
+  // DO NOT change this definition; Use it to store JSON elements.
+   vector<JsonElem>       _obj;
 };
 
 #endif // P2_TABLE_H

@@ -15,7 +15,6 @@
 
 using namespace std;
 
-// Implement member functions of class Row and Table here
 bool Json::read(const string& jsonFile) {
    ifstream file(jsonFile);
    char c = file.get();
