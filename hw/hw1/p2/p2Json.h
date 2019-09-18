@@ -17,12 +17,10 @@ using namespace std;
 class JsonElem
 {
 public:
-  
+
    // TODO: define constructor & member functions on your own
    JsonElem() {}
    JsonElem(const string& k, int v): _key(k), _value(v) {}
-   string k_str() { return _key; }
-   string v_str() { return to_string(_value); }
 
    friend ostream& operator << (ostream&, const JsonElem&);
 
@@ -39,6 +37,7 @@ public:
    bool read(const string&);
    void help();
    void print();
+   void add(const string&);
 
 private:
    vector<JsonElem>       _obj;  // DO NOT change this definition.

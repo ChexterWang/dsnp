@@ -42,7 +42,6 @@ bool Json::read(const string& jsonFile) {
      }
      c = file.get();
    }
-   file.close();
    return false;
 }
 
@@ -70,7 +69,19 @@ void Json::print() {
   cout << "\n}" << endl;
 }
 
-
+void Json::add(const string& cmd){
+  string temp = "";
+  string str = cmd + " ";
+  vector<string> argss;
+  for(string::iterator it = str.begin(); it != str.end(); ++it){
+    if(*it != ' ') temp += string(1, *it);
+    else if(temp != ""){
+      argss.push_back(temp);
+      temp = "";
+    }
+  }
+  if(argss.size() > 2) _obj.push_back(JsonElem(argss.at(1), stoi(argss.at(2))));
+}
 
 ostream& operator << (ostream& os, const JsonElem& j) {
    return (os << "\"" << j._key << "\" : " << j._value);

@@ -27,13 +27,13 @@ int main()
    }
 
    // TODO read and execute commands
-   // cout << "Enter command: ";
-   while (true) {
-      cout << "Enter command: ";
-      string cmd;
-      cin >> cmd;
+   string cmd = "";
+   cout << "Enter command: ";
+   while (getline(cin, cmd, '\n')) {
       if(!cmd.compare("EXIT")) exit(0);
       if(!cmd.compare("HELP")) json.help();
       if(!cmd.compare("PRINT")) json.print();
+      if(cmd.find("ADD") == 0) json.add(cmd);
+      if(cmd.compare("")) cout << "Enter command: ";
     }
 }
