@@ -60,19 +60,13 @@ void Json::help() {
   cout << endl;
 }
 
-void elem_str(JsonElem elem) {
-  cout << "  \"" << elem.k_str() << "\" : " << elem.v_str() << "," << endl;
-}
-
-void lastElem_str(JsonElem elem) {
-  cout << "  \"" << elem.k_str() << "\" : " << elem.v_str() << endl;
-}
-
 void Json::print() {
   cout << "{" << endl;
-  if(_obj.size() > 0){
-    for_each(_obj.begin(), _obj.end()-1, elem_str);
-    for_each(_obj.end()-1, _obj.end()  , lastElem_str);
+  vector<JsonElem>::iterator it = _obj.begin();
+  string comma = "";
+  while(it != _obj.end()){
+    cout << comma << *it;
+    comma = ",";
   }
   cout << "}" << endl;
 }
