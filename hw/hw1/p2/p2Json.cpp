@@ -62,9 +62,8 @@ void Json::help() {
 
 void Json::print() {
   cout << "{" << endl;
-  vector<JsonElem>::iterator it = _obj.begin();
   string comma = "";
-  while(it != _obj.end()){
+  for(auto it = _obj.begin(); it != _obj.end(); ++it){
     cout << comma << *it;
     comma = ",";
   }
