@@ -84,20 +84,46 @@ void Json::add(const string& cmd) {
   if(argss.size() > 2) _obj.push_back(JsonElem(argss.at(1), stoi(argss.at(2))));
 }
 
+int JsonElem::getValue() {
+  int &temp = _value;
+  return temp;
+}
+
 void Json::avg() {
-  cout << "jizz";
+  if(_obj.size() == 0) cout << "Error: No element found!" << endl;
+  else {
+    float total = 0;
+    for(auto it = _obj.begin(); it != _obj.end(); ++it){
+      total += float(it->getValue());
+    }
+    total = total / _obj.size();
+    cout << "The average of the values is: ";
+    cout << fixed << setprecision(1) << total << "." << endl;
+  }
 }
 
 void Json::max() {
-  cout << "jizz";
+  if(_obj.size() == 0) cout << "Error: No element found!" << endl;
+  else {
+    cout << "jizz";
+  }
 }
-
 void Json::min() {
-  cout << "jizzz";
+  if(_obj.size() == 0) cout << "Error: No element found!" << endl;
+  else {
+    cout << "jizz";
+  }
 }
 
 void Json::sum() {
-  cout << "jizzzz";
+  if(_obj.size() == 0) cout << "Error: No element found!" << endl;
+  else {
+    int total;
+    for(auto it = _obj.begin(); it != _obj.end(); ++it){
+      total += it->getValue();
+    }
+    cout << "The summation of the values is: " << total << "." << endl;
+  }
 }
 
 ostream& operator << (ostream& os, const JsonElem& j) {
