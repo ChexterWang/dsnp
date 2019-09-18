@@ -9,8 +9,8 @@
 #include <string>
 #include <fstream>
 #include <vector>
-#include <algorithm>
-#include <iomanip>
+#include <algorithm> // find() in vector<>
+#include <iomanip>   // setprecision
 #include "p2Json.h"
 
 using namespace std;

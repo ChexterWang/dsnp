@@ -17,12 +17,10 @@ using namespace std;
 class JsonElem
 {
 public:
-
    JsonElem() {}
    JsonElem(const string& k, int v): _key(k), _value(v) {}
    int getValue();
    string getKey();
-
    friend ostream& operator << (ostream&, const JsonElem&);
 
 private:
@@ -33,7 +31,6 @@ private:
 class Json
 {
 public:
-
    bool read(const string&);
    void help();
    void print();
@@ -45,7 +42,6 @@ public:
    void cmd404(const string&);
 
 private:
-
   // DO NOT change this definition; Use it to store JSON elements.
    vector<JsonElem>       _obj;
 };

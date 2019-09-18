@@ -29,14 +29,14 @@ int main()
    string cmd = "";
    while (getline(cin, cmd, '\n')) {
      if(cmd.compare("")){
-        if(!cmd.compare("EXIT")) exit(0);
-        else if(!cmd.compare("HELP")) json.help();
+        if(!cmd.compare("EXIT"))       exit(0);
+        else if(!cmd.compare("HELP"))  json.help();
         else if(!cmd.compare("PRINT")) json.print();
-        else if(cmd.find("ADD") == 0) json.add(cmd);
-        else if(!cmd.compare("AVE")) json.ave();
-        else if(!cmd.compare("MAX")) json.max();
-        else if(!cmd.compare("MIN")) json.min();
-        else if(!cmd.compare("SUM")) json.sum();
+        else if(cmd.find("ADD") == 0)  json.add(cmd);
+        else if(!cmd.compare("AVE"))   json.ave();
+        else if(!cmd.compare("MAX"))   json.max();
+        else if(!cmd.compare("MIN"))   json.min();
+        else if(!cmd.compare("SUM"))   json.sum();
         else json.cmd404(cmd);
       }
       cout << "Enter command: ";
