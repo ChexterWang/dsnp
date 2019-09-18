@@ -38,6 +38,10 @@ public:
    void help();
    void print();
    void add(const string&);
+   void avg();
+   void max();
+   void min();
+   void sum();
 
 private:
    vector<JsonElem>       _obj;  // DO NOT change this definition.

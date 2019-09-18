@@ -63,13 +63,14 @@ void Json::print() {
   cout << "{" << endl;
   string comma = "";
   for(auto it = _obj.begin(); it != _obj.end(); ++it){
-    cout << comma << "  " << *it ;
+    cout << comma << "  " << *it;
     comma = ",\n";
   }
-  cout << "\n}" << endl;
+  if(_obj.begin() != _obj.end()) cout << endl;
+  cout << "}" << endl;
 }
 
-void Json::add(const string& cmd){
+void Json::add(const string& cmd) {
   string temp = "";
   string str = cmd + " ";
   vector<string> argss;
@@ -81,6 +82,22 @@ void Json::add(const string& cmd){
     }
   }
   if(argss.size() > 2) _obj.push_back(JsonElem(argss.at(1), stoi(argss.at(2))));
+}
+
+void Json::avg() {
+  cout << "jizz";
+}
+
+void Json::max() {
+  cout << "jizz";
+}
+
+void Json::min() {
+  cout << "jizzz";
+}
+
+void Json::sum() {
+  cout << "jizzzz";
 }
 
 ostream& operator << (ostream& os, const JsonElem& j) {
