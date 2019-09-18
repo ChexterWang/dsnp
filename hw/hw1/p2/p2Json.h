@@ -38,13 +38,14 @@ public:
    void help();
    void print();
    void add(const string&);
-   void avg();
+   void ave();
    void max();
    void min();
    void sum();
+   void cmd404(const string&);
 
 private:
-  
+
   // DO NOT change this definition; Use it to store JSON elements.
    vector<JsonElem>       _obj;
 };

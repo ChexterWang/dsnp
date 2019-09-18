@@ -77,6 +77,17 @@ void Json::add(const string& cmd) {
   for(string::iterator it = str.begin(); it != str.end(); ++it){
     if(*it != ' ') temp += string(1, *it);
     else if(temp != ""){
+      if(argss.size() == 1){
+        bool repeated = true;
+        for(vector<JsonElem>::iterator itt = _obj.begin(); itt <= _obj.end(); ++itt){
+          if(temp == (itt->getKey())) break;
+          if(itt == _obj.end()) repeated = false;
+        }
+        if(repeated){
+          cout << "Error: Key \"" << temp << "\" is repeated!!" << endl;
+          break;
+        }
+      }
       argss.push_back(temp);
       temp = "";
     }
@@ -94,7 +105,7 @@ string JsonElem::getKey() {
   return temp;
 }
 
-void Json::avg() {
+void Json::ave() {
   if(_obj.size() == 0) cout << "Error: No element found!" << endl;
   else {
     float total = 0;
@@ -114,7 +125,7 @@ void Json::max() {
     for(auto it = _obj.begin()+1; it != _obj.end(); ++it){
       if((it->getValue()) > (itTemp->getValue())) itTemp = it;
     }
-    cout << "The maximum element is: {" << *itTemp << "}." << endl;
+    cout << "The maximum element is: { " << *itTemp << " }." << endl;
   }
 }
 
@@ -125,7 +136,7 @@ void Json::min() {
     for(auto it = _obj.begin()+1; it != _obj.end(); ++it){
       if((it->getValue()) < (itTemp->getValue())) itTemp = it;
     }
-    cout << "The minimum element is: {" << *itTemp << "}." << endl;
+    cout << "The minimum element is: { " << *itTemp << " }." << endl;
   }
 }
 
@@ -138,6 +149,10 @@ void Json::sum() {
     }
     cout << "The summation of the values is: " << total << "." << endl;
   }
+}
+
+void Json::cmd404(const string& cmd) {
+  cout << "Error: unknown command: \"" << cmd << "\"" << endl;
 }
 
 ostream& operator << (ostream& os, const JsonElem& j) {
