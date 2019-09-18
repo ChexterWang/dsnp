@@ -115,7 +115,7 @@ void Json::max() {
     for(auto it = _obj.begin()+1; it != _obj.end(); ++it){
       if((it->getValue()) > (itTemp->getValue())) itTemp = it;
     }
-    cout << "The maximum element is: " << *itTemp << "." << endl;
+    cout << "The maximum element is: {" << *itTemp << "}." << endl;
   }
 }
 
@@ -126,7 +126,7 @@ void Json::min() {
     for(auto it = _obj.begin()+1; it != _obj.end(); ++it){
       if((it->getValue()) < (itTemp->getValue())) itTemp = it;
     }
-    cout << "The minimum element is: " << *itTemp << "." << endl;
+    cout << "The minimum element is: {" << *itTemp << "}." << endl;
   }
 }
 
