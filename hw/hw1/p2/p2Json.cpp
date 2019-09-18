@@ -10,6 +10,7 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
+#include <iomanip>
 #include "p2Json.h"
 
 using namespace std;
@@ -89,6 +90,11 @@ int JsonElem::getValue() {
   return temp;
 }
 
+string JsonElem::getKey() {
+  string &temp = _key;
+  return temp;
+}
+
 void Json::avg() {
   if(_obj.size() == 0) cout << "Error: No element found!" << endl;
   else {
@@ -105,20 +111,29 @@ void Json::avg() {
 void Json::max() {
   if(_obj.size() == 0) cout << "Error: No element found!" << endl;
   else {
-    cout << "jizz";
+    vector<JsonElem>::iterator itTemp = _obj.begin();
+    for(auto it = _obj.begin()+1; it != _obj.end(); ++it){
+      if((it->getValue()) > (itTemp->getValue())) itTemp = it;
+    }
+    cout << "The maximum element is: " << *itTemp << "." << endl;
   }
 }
+
 void Json::min() {
   if(_obj.size() == 0) cout << "Error: No element found!" << endl;
   else {
-    cout << "jizz";
+    vector<JsonElem>::iterator itTemp = _obj.begin();
+    for(auto it = _obj.begin()+1; it != _obj.end(); ++it){
+      if((it->getValue()) < (itTemp->getValue())) itTemp = it;
+    }
+    cout << "The minimum element is: " << *itTemp << "." << endl;
   }
 }
 
 void Json::sum() {
   if(_obj.size() == 0) cout << "Error: No element found!" << endl;
   else {
-    int total;
+    int total = 0;
     for(auto it = _obj.begin(); it != _obj.end(); ++it){
       total += it->getValue();
     }

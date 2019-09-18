@@ -22,6 +22,7 @@ public:
    JsonElem() {}
    JsonElem(const string& k, int v): _key(k), _value(v) {}
    int getValue();
+   string getKey();
 
    friend ostream& operator << (ostream&, const JsonElem&);
 
