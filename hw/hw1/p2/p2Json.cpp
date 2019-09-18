@@ -64,10 +64,10 @@ void Json::print() {
   cout << "{" << endl;
   string comma = "";
   for(auto it = _obj.begin(); it != _obj.end(); ++it){
-    cout << comma << *it;
-    comma = ",";
+    cout << comma << "  " << *it ;
+    comma = ",\n";
   }
-  cout << "}" << endl;
+  cout << "\n}" << endl;
 }
 
 
