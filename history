@@ -1,0 +1,33 @@
+[1mdpkg:[0m dependency problems prevent configuration of libgtk2.0-0:i386:
+ libgtk2.0-0:i386 depends on libgtk2.0-common; however:
+  Package libgtk2.0-common is not installed.
+ libgtk2.0-0:i386 depends on libpango-1.0-0 (>= 1.28.3); however:
+  Package libpango-1.0-0 is not installed.
+ libgtk2.0-0:i386 depends on libpangocairo-1.0-0 (>= 1.28.3); however:
+  Package libpangocairo-1.0-0 is not installed.
+ libgtk2.0-0:i386 depends on libpangoft2-1.0-0 (>= 1.28.3); however:
+  Package libpangoft2-1.0-0 is not installed.
+ libgtk2.0-0:i386 depends on libxcomposite1 (>= 1:0.3-1); however:
+  Package libxcomposite1 is not installed.
+ libgtk2.0-0:i386 depends on libxcursor1 (>> 1.1.2); however:
+  Package libxcursor1 is not installed.
+ libgtk2.0-0:i386 depends on libxdamage1 (>= 1:1.1); however:
+  Package libxdamage1 is not installed.
+ libgtk2.0-0:i386 depends on libxfixes3; however:
+  Package libxfixes3 is not installed.
+ libgtk2.0-0:i386 depends on libxi6; however:
+  Package libxi6 is not installed.
+ libgtk2.0-0:i386 depends on libxinerama1; however:
+  Package libxinerama1 is not installed.
+ libgtk2.0-0:i386 depends on libxrandr2 (>= 2:1.5.0); however:
+  Package libxrandr2 is not installed.
+ libgtk2.0-0:i386 depends on adwaita-icon-theme | gnome-icon-theme; however:
+  Package adwaita-icon-theme is not installed.
+  Package gnome-icon-theme is not installed.
+ libgtk2.0-0:i386 depends on hicolor-icon-theme; however:
+  Package hicolor-icon-theme is not installed.
+
+[1mdpkg:[0m error processing package libgtk2.0-0:i386 (--install):
+ dependency problems - leaving unconfigured
+Errors were encountered while processing:
+ libgtk2.0-0:i386
