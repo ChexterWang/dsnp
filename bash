@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 wget http://ftp.br.debian.org/debian/pool/main/libx/libxrandr/libxrandr2_1.5.1-1_i386.deb
 wget http://ftp.br.debian.org/debian/pool/main/libx/libxinerama/libxinerama1_1.1.4-2_i386.deb
 wget http://ftp.br.debian.org/debian/pool/main/libx/libxi/libxi6_1.7.9-1_i386.deb
