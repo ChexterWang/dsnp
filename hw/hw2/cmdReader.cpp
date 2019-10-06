@@ -7,6 +7,7 @@
 ****************************************************************************/
 #include <cassert>
 #include <cstring>
+#include <algorithm>
 #include "cmdParser.h"
 
 using namespace std;
@@ -58,7 +59,7 @@ CmdParser::readCmdInt(istream& istr)
          case PG_UP_KEY      : moveToHistory(_historyIdx - PG_OFFSET); break;
          case PG_DOWN_KEY    : moveToHistory(_historyIdx + PG_OFFSET); break;
          case TAB_KEY        : /* TODO */ break;
-         case INSERT_KEY     : // not yet supported; fall through to UNDEFINE
+         case INSERT_KEY     : deleteLine();// not yet supported; fall through to UNDEFINE
          case UNDEFINED_KEY:   mybeep(); break;
          default:  // printable character
             insertChar(char(pch)); break;
@@ -119,10 +120,15 @@ bool CmdParser::moveBufPtr(char* const ptr) {
 // cmd> This is he command
 //              ^
 //
-bool
-CmdParser::deleteChar()
-{
+bool CmdParser::deleteChar() {
    // TODO...
+   for(char* it=_readBufPtr; it<_readBufEnd; it++){
+      if(it == _readBufEnd-1) cout << " ";
+      else cout << *(it+1);
+      *it = *(it+1);
+   }
+   for(char* it=_readBufPtr; it<_readBufEnd; it++) cout << '\b';
+   _readBufEnd = find(_readBuf, _readBufEnd, '\0');
    return true;
 }
 
@@ -152,10 +158,10 @@ CmdParser::insertChar(char ch, int repeat)
       *it=ch;
       cout << ch;
    }
-   for(char* it=_readBufPtr+repeat; it<=_readBufPtr+repeat; it++) cout << *it;
-   _readBufPtr += repeat;
+   for(char* it=_readBufPtr+repeat; it<_readBufEnd+repeat; it++) cout << *it;
+   for(char* it=_readBufPtr+repeat; it<_readBufEnd+repeat; it++) cout << '\b';
    _readBufEnd += repeat;
-   moveBufPtr(_readBufPtr);
+   _readBufPtr += repeat;
 
 }
 
@@ -177,6 +183,10 @@ void
 CmdParser::deleteLine()
 {
    // TODO...
+   for(char* it=_readBufPtr+5; it>=_readBuf; it--) cout << '\b';
+   for(char* it=_readBuf; it<_readBufEnd+5; it++) cout << ' ';
+   for(char* it=_readBuf; it<_readBufEnd+5; it++) cout << '\b';
+   resetBufAndPrintPrompt();
 }
 
 
