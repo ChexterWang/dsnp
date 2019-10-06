@@ -53,8 +53,8 @@ CmdParser::readCmdInt(istream& istr)
                                resetBufAndPrintPrompt(); break;
          case ARROW_UP_KEY   : moveToHistory(_historyIdx - 1); break;
          case ARROW_DOWN_KEY : moveToHistory(_historyIdx + 1); break;
-         case ARROW_RIGHT_KEY: /* TODO */ break;
-         case ARROW_LEFT_KEY : /* TODO */ break;
+         case ARROW_RIGHT_KEY: moveBufPtr(_readBufPtr + 1); break;
+         case ARROW_LEFT_KEY : moveBufPtr(_readBufPtr - 1); break;
          case PG_UP_KEY      : moveToHistory(_historyIdx - PG_OFFSET); break;
          case PG_DOWN_KEY    : moveToHistory(_historyIdx + PG_OFFSET); break;
          case TAB_KEY        : /* TODO */ break;
@@ -82,11 +82,21 @@ CmdParser::readCmdInt(istream& istr)
 //
 // [Note] This function can also be called by other member functions below
 //        to move the _readBufPtr to proper position.
-bool
-CmdParser::moveBufPtr(char* const ptr)
-{
+bool CmdParser::moveBufPtr(char* const ptr) {
    // TODO...
-   return true;
+   if ((ptr >= _readBuf) && (ptr <= _readBufEnd)) {
+      if (ptr < _readBufPtr) {
+         for(int i=0; i<_readBufPtr-ptr; i++) cout << '\b';
+      }
+      else if (ptr > _readBufPtr) {
+         for(char* i=_readBufPtr; i < ptr; i++) cout << *i;
+      }
+      _readBufPtr = ptr;
+      return true;
+   } else {
+      mybeep();
+      return false;
+   }
 }
 
 
@@ -136,6 +146,17 @@ CmdParser::insertChar(char ch, int repeat)
 {
    // TODO...
    assert(repeat >= 1);
+
+   for(char* it=_readBufEnd+repeat; it>=_readBufPtr+repeat; it--) *it=*(it-repeat);
+   for(char* it=_readBufPtr; it<_readBufPtr+repeat; it++){
+      *it=ch;
+      cout << ch;
+   }
+   for(char* it=_readBufPtr+repeat; it<=_readBufPtr+repeat; it++) cout << *it;
+   _readBufPtr += repeat;
+   _readBufEnd += repeat;
+   moveBufPtr(_readBufPtr);
+
 }
 
 // 1. Delete the line that is currently shown on the screen
