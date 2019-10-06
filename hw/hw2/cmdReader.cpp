@@ -257,7 +257,10 @@ void CmdParser::addHistory() {
       if(!start && (*it != ' ')) start = true;
       if(start) str += *it;
    }
-   _tempCmdStored = false;
+   if(_tempCmdStored){
+      _history.pop_back();
+      _tempCmdStored = false;
+   }
    if(str.compare("")) _history.push_back(str);
    _historyIdx = _history.size();
 }
