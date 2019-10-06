@@ -59,7 +59,7 @@ CmdParser::readCmdInt(istream& istr)
          case ARROW_LEFT_KEY : moveBufPtr(_readBufPtr - 1); break;
          case PG_UP_KEY      : moveToHistory(_historyIdx - PG_OFFSET); break;
          case PG_DOWN_KEY    : moveToHistory(_historyIdx + PG_OFFSET); break;
-         case TAB_KEY        : insertChar(' ', 8-(_readBufPtr-_readBuf)%8); break;
+         case TAB_KEY        : insertChar(' ', TAB_POSITION-(_readBufPtr-_readBuf)%TAB_POSITION); break;
          case INSERT_KEY     : // not yet supported; fall through to UNDEFINE
          case UNDEFINED_KEY:   mybeep(); break;
          default:  // printable character
@@ -121,7 +121,10 @@ bool CmdParser::moveBufPtr(char* const ptr) {
 //              ^
 //
 bool CmdParser::deleteChar() {
-   if(_readBuf == _readBufEnd) mybeep();
+   if(_readBuf == _readBufEnd) {
+      mybeep();
+      return false;
+   }
    for(char* it=_readBufPtr; it<_readBufEnd; it++){
       if(it == _readBufEnd-1) cout << " ";
       else cout << *(it+1);
