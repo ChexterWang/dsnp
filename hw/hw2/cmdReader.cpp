@@ -8,6 +8,7 @@
 #include <cassert>
 #include <cstring>
 #include <algorithm>
+#include <bits/stdc++.h>
 #include "cmdParser.h"
 
 using namespace std;
@@ -47,7 +48,7 @@ CmdParser::readCmdInt(istream& istr)
          case HOME_KEY       : moveBufPtr(_readBuf); break;
          case LINE_END_KEY   :
          case END_KEY        : moveBufPtr(_readBufEnd); break;
-         case BACK_SPACE_KEY : /* TODO */ break;
+         case BACK_SPACE_KEY : (moveBufPtr(_readBufPtr-1)) ? deleteChar() : true; break;
          case DELETE_KEY     : deleteChar(); break;
          case NEWLINE_KEY    : addHistory();
                                cout << char(NEWLINE_KEY);
@@ -58,8 +59,8 @@ CmdParser::readCmdInt(istream& istr)
          case ARROW_LEFT_KEY : moveBufPtr(_readBufPtr - 1); break;
          case PG_UP_KEY      : moveToHistory(_historyIdx - PG_OFFSET); break;
          case PG_DOWN_KEY    : moveToHistory(_historyIdx + PG_OFFSET); break;
-         case TAB_KEY        : /* TODO */ break;
-         case INSERT_KEY     : deleteLine();// not yet supported; fall through to UNDEFINE
+         case TAB_KEY        : insertChar(' ', 8-(_readBufEnd-_readBufPtr)%8); break;
+         case INSERT_KEY     : // not yet supported; fall through to UNDEFINE
          case UNDEFINED_KEY:   mybeep(); break;
          default:  // printable character
             insertChar(char(pch)); break;
@@ -84,7 +85,6 @@ CmdParser::readCmdInt(istream& istr)
 // [Note] This function can also be called by other member functions below
 //        to move the _readBufPtr to proper position.
 bool CmdParser::moveBufPtr(char* const ptr) {
-   // TODO...
    if ((ptr >= _readBuf) && (ptr <= _readBufEnd)) {
       if (ptr < _readBufPtr) {
          for(int i=0; i<_readBufPtr-ptr; i++) cout << '\b';
@@ -121,7 +121,6 @@ bool CmdParser::moveBufPtr(char* const ptr) {
 //              ^
 //
 bool CmdParser::deleteChar() {
-   // TODO...
    for(char* it=_readBufPtr; it<_readBufEnd; it++){
       if(it == _readBufEnd-1) cout << " ";
       else cout << *(it+1);
@@ -150,7 +149,6 @@ bool CmdParser::deleteChar() {
 void
 CmdParser::insertChar(char ch, int repeat)
 {
-   // TODO...
    assert(repeat >= 1);
 
    for(char* it=_readBufEnd+repeat; it>=_readBufPtr+repeat; it--) *it=*(it-repeat);
@@ -179,10 +177,7 @@ CmdParser::insertChar(char ch, int repeat)
 // cmd>
 //      ^
 //
-void
-CmdParser::deleteLine()
-{
-   // TODO...
+void CmdParser::deleteLine() {
    for(char* it=_readBufPtr+5; it>=_readBuf; it--) cout << '\b';
    for(char* it=_readBuf; it<_readBufEnd+5; it++) cout << ' ';
    for(char* it=_readBuf; it<_readBufEnd+5; it++) cout << '\b';
@@ -208,10 +203,32 @@ CmdParser::deleteLine()
 //
 // [Note] index should not = _historyIdx
 //
-void
-CmdParser::moveToHistory(int index)
-{
+void CmdParser::moveToHistory(int index) {
    // TODO...
+   if(index < _historyIdx){
+      if(index < 0) index = 0;
+      if(_historyIdx == 0) mybeep();
+      else if((size_t)_historyIdx == _history.size()){
+         _history.push_back(_readBuf);
+         _tempCmdStored = true;
+         _historyIdx = index;
+         retrieveHistory();
+      } else {
+         _historyIdx = index;
+         retrieveHistory();
+      }
+   } else {
+      if((size_t)_historyIdx == _history.size()) mybeep();
+      else if((size_t)index >= _history.size()-1){
+         _historyIdx = _history.size()-1;
+         retrieveHistory();
+         _history.pop_back();
+         _tempCmdStored = false;
+      } else {
+         _historyIdx = index;
+         retrieveHistory();
+      }
+   }
 }
 
 
@@ -227,10 +244,22 @@ CmdParser::moveToHistory(int index)
 //    and reset _tempCmdStored to false
 // 5. Reset _historyIdx to _history.size() // for future insertion
 //
-void
-CmdParser::addHistory()
-{
+void CmdParser::addHistory() {
    // TODO...
+   bool start = false;
+   int i=0;
+   string str = "";
+   for(char* it = _readBufEnd-1; it>=_readBuf; it--) {
+      if(*it != ' ') break;
+      else i++;
+   }
+   for(char* it = _readBuf; it<_readBufEnd-i; it++){
+      if(!start && (*it != ' ')) start = true;
+      if(start) str += *it;
+   }
+   _tempCmdStored = false;
+   if(str.compare("")) _history.push_back(str);
+   _historyIdx = _history.size();
 }
 
 

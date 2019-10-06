@@ -56,7 +56,7 @@ char mygetc(istream& istr)
 }
 
 void mybeep()
-{
+{  
    cout << char(BEEP_CHAR);
 }
 
