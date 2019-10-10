@@ -1,0 +1,9 @@
+**/hw2/*.doc
+**/hw2/*.pdf
+**/hw2/*.txt
+**/hw2/*.o
+**/hw2/cmdReader*
+**/hw2/history
+**/hw2/hw2.test1
+**/hw2/main.o
+**/hw2/testAsc.o
