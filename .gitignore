@@ -1,3 +1,10 @@
+**/pr/*/*.out
+**/pr/*/*.o
+
+**/hw1/p2/*.o
+**/hw1/p2/p2Run
+**/hw1/p2/*.json
+
 **/hw2/*.doc
 **/hw2/*.pdf
 **/hw2/*.txt
@@ -7,3 +14,8 @@
 **/hw2/hw2.test1
 **/hw2/main.o
 **/hw2/testAsc.o
+
+**/hw3/src/*/*.o
+**/hw3/bin/*
+**/hw3/ref
+
