@@ -23,26 +23,56 @@ using namespace std;
 /*****************************************/
 /*          Global Functions             */
 /*****************************************/
-ostream&
-operator << (ostream& os, const DBJsonElem& j)
-{
+ostream& operator << (ostream& os, const DBJsonElem& j) {
    os << "\"" << j._key << "\" : " << j._value;
    return os;
 }
 
 istream& operator >> (istream& is, DBJson& j)
 {
-   // TODO: to read in data from Json file and store them in a DB 
+   // TODO: to read in data from Json file and store them in a DB
    // - You can assume the input file is with correct JSON file format
    // - NO NEED to handle error file format
    assert(j._obj.empty());
-
+   char c = is.get();
+   char esc[] = {'\n', '\t', '\r', '\b', '\0', '\\', '\'', ' ', '{', ':'};
+   bool inKey = false;
+   string keyTemp = "";
+   string valueTemp = "";
+   while(file.good()){
+     vector<char> escape(esc, esc+10);
+     vector<char>::iterator it;
+     it = find(escape.begin(), escape.end(), c);
+     if(c == '"') inKey = !inKey;
+     else if(((c == ',') || (c == '}')) && keyTemp != "" && valueTemp != ""){
+       int valueTempInt = 0;
+       if(myStr2Int(valueTemp, valueTempInt)){
+         DBJsonElem elem(keyTemp, valueTempInt);
+         j._obj.push_back(elem);
+       }
+     }
+     // find: if c is not in esc[], "it" will reach the end.
+     else if(it == escape.end()){
+       if(inKey) keyTemp += string(1, c);
+       else valueTemp += string(1, c);
+     }
+     if(c == '}') file.close();
+     c = file.get();
+   }
    return is;
 }
 
 ostream& operator << (ostream& os, const DBJson& j)
 {
    // TODO
+   os << "{" << endl;
+   string comma = "";
+   for(auto it = j._obj.begin(); it != j._obj.end(); ++it){
+     os << comma << "  " << *it;
+     comma = ",\n";
+   }
+   if(j._obj.begin() != j._obj.end()) cout << endl;
+   os << "}" << endl;
    return os;
 }
 
