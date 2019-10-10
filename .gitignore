@@ -16,4 +16,6 @@
 **/hw2/testAsc.o
 
 **/hw3/src/*/*.o
-
+**/hw3/bin
+**/hw3/src/*/*.mak
+**/hw3/lib

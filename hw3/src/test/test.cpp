@@ -51,5 +51,11 @@ main(int argc, char** argv)
 
    dbjson.add(DBJsonElem("jizz", 123));
    cout << dbjson << endl;
+
+   cout << dbjson.ave() << endl;
+   cout << dbjson.sum() << endl;
+   size_t i = 0;
+   dbjson.min(i);
+   cout << dbjson[i] << endl;
    return 0;
 }

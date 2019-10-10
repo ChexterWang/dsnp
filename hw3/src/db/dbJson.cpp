@@ -28,8 +28,7 @@ ostream& operator << (ostream& os, const DBJsonElem& j) {
    return os;
 }
 
-istream& operator >> (istream& is, DBJson& j)
-{
+istream& operator >> (istream& is, DBJson& j) {
    // TODO: to read in data from Json file and store them in a DB
    // - You can assume the input file is with correct JSON file format
    // - NO NEED to handle error file format
@@ -48,6 +47,7 @@ istream& operator >> (istream& is, DBJson& j)
        int valueTempInt = 0;
        if(myStr2Int(valueTemp, valueTempInt)){
          j._obj.push_back(DBJsonElem(keyTemp, valueTempInt));
+         keyTemp = valueTemp = "";
        }
      }
      // find: if c is not in esc[], "it" will reach the end.
@@ -61,8 +61,7 @@ istream& operator >> (istream& is, DBJson& j)
    return is;
 }
 
-ostream& operator << (ostream& os, const DBJson& j)
-{
+ostream& operator << (ostream& os, const DBJson& j) {
    // TODO
    os << "{" << endl;
    string comma = "";
@@ -81,10 +80,9 @@ ostream& operator << (ostream& os, const DBJson& j)
 /*****************************************/
 /*   Member Functions for class DBJson   */
 /*****************************************/
-void
-DBJson::reset()
-{
+void DBJson::reset() {
    // TODO
+   _obj.clear();
 }
 
 // return false if key is repeated
@@ -98,50 +96,76 @@ bool DBJson::add(const DBJsonElem& elm) {
 }
 
 // return NAN if DBJson is empty
-float
-DBJson::ave() const
-{
+float DBJson::ave() const {
    // TODO
-   return 0.0;
+   if(_obj.size() == 0) return nanf("");
+   else {
+     float total = 0;
+     for(DBJsonElem dbElm: _obj) total += float(dbElm.value());
+     total = total / _obj.size();
+     return total;
+   }
 }
 
 // If DBJson is empty, set idx to size() and return INT_MIN
-int
-DBJson::max(size_t& idx) const
-{
+int DBJson::max(size_t& idx) const {
    // TODO
    int maxN = INT_MIN;
-   return  maxN;
+   if(_obj.size() == 0) {
+     idx = _obj.size();
+     return maxN;
+   } else {
+     maxN = _obj.at(0).value();
+     idx = 0;
+     for(DBJsonElem dbElm: _obj){
+       if(dbElm.value() > maxN){
+         maxN = dbElm.value();
+         idx++;
+       }
+     }
+     return 0;
+   }
 }
 
 // If DBJson is empty, set idx to size() and return INT_MIN
-int
-DBJson::min(size_t& idx) const
-{
+int DBJson::min(size_t& idx) const {
    // TODO
    int minN = INT_MAX;
-   return  minN;
+   if(_obj.size() == 0) {
+     idx = _obj.size();
+     return minN;
+   } else {
+     minN = _obj.at(0).value();
+     idx = 0;
+     for(DBJsonElem dbElm: _obj){
+       if(dbElm.value() < minN){
+         minN = dbElm.value();
+         idx++;
+       }
+     }
+     return 0;
+   }
 }
 
-void
-DBJson::sort(const DBSortKey& s)
-{
+void DBJson::sort(const DBSortKey& s) {
    // Sort the data according to the order of columns in 's'
    ::sort(_obj.begin(), _obj.end(), s);
 }
 
-void
-DBJson::sort(const DBSortValue& s)
-{
+void DBJson::sort(const DBSortValue& s) {
    // Sort the data according to the order of columns in 's'
    ::sort(_obj.begin(), _obj.end(), s);
 }
 
 // return 0 if empty
-int
-DBJson::sum() const
-{
+int DBJson::sum() const {
    // TODO
    int s = 0;
-   return s;
+   if(_obj.size() == 0) return s;
+   else {
+     for(DBJsonElem dbElm: _obj){
+       s += dbElm.value();
+     }
+     return s;
+   }
 }
