@@ -39,8 +39,6 @@ main(int argc, char** argv)
    if (!(inf >> dbjson)) {
       cerr << "Error in reading JSON file!!" << endl;
       exit(-1);
-   } else {
-     cout << "jizz" << endl;
    }
 
    cout << "========================" << endl;
@@ -51,6 +49,7 @@ main(int argc, char** argv)
    // TODO
    // Insert what you want to test here by calling DBJson's member functions
 
-
+   dbjson.add(DBJsonElem("jizz", 123));
+   cout << dbjson << endl;
    return 0;
 }

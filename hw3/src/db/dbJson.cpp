@@ -39,7 +39,7 @@ istream& operator >> (istream& is, DBJson& j)
    bool inKey = false;
    string keyTemp = "";
    string valueTemp = "";
-   while(file.good()){
+   while(is.good()){
      vector<char> escape(esc, esc+10);
      vector<char>::iterator it;
      it = find(escape.begin(), escape.end(), c);
@@ -47,8 +47,7 @@ istream& operator >> (istream& is, DBJson& j)
      else if(((c == ',') || (c == '}')) && keyTemp != "" && valueTemp != ""){
        int valueTempInt = 0;
        if(myStr2Int(valueTemp, valueTempInt)){
-         DBJsonElem elem(keyTemp, valueTempInt);
-         j._obj.push_back(elem);
+         j._obj.push_back(DBJsonElem(keyTemp, valueTempInt));
        }
      }
      // find: if c is not in esc[], "it" will reach the end.
@@ -56,8 +55,8 @@ istream& operator >> (istream& is, DBJson& j)
        if(inKey) keyTemp += string(1, c);
        else valueTemp += string(1, c);
      }
-     if(c == '}') file.close();
-     c = file.get();
+     if(c == '}') break;
+     c = is.get();
    }
    return is;
 }
@@ -89,10 +88,12 @@ DBJson::reset()
 }
 
 // return false if key is repeated
-bool
-DBJson::add(const DBJsonElem& elm)
-{
+bool DBJson::add(const DBJsonElem& elm) {
    // TODO
+   for(DBJsonElem dbElm: _obj){
+     if(!elm.key().compare(dbElm.key())) return false;
+   }
+   _obj.push_back(elm);
    return true;
 }
 
