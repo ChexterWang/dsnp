@@ -98,7 +98,7 @@ bool DBJson::add(const DBJsonElem& elm) {
 // return NAN if DBJson is empty
 float DBJson::ave() const {
    // TODO
-   if(_obj.size() == 0) return nanf("");
+   if(_obj.size() == 0) return NAN;
    else {
      float total = 0;
      for(DBJsonElem dbElm: _obj) total += float(dbElm.value());

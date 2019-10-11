@@ -20,6 +20,19 @@ bool
 initDbCmd()
 {
    // TODO...
+   if (!(cmdMgr->regCmd("DBAPpend", 4, new DBAppendCmd) &&
+         cmdMgr->regCmd("DBAVerage", 4, new DBAveCmd) &&
+         cmdMgr->regCmd("DBCount", 3, new DBCountCmd) &&
+         cmdMgr->regCmd("DBMAx", 4, new DBMaxCmd) &&
+         cmdMgr->regCmd("DBMIn", 4, new DBMinCmd) &&
+         cmdMgr->regCmd("DBPrint", 3, new DBPrintCmd) &&
+         cmdMgr->regCmd("DBRead", 3, new DBReadCmd) &&
+         cmdMgr->regCmd("DBSOrt", 4, new DBSortCmd) &&
+         cmdMgr->regCmd("DBSUm", 4, new DBSumCmd)
+      )) {
+      cerr << "Registering \"init\" commands fails... exiting" << endl;
+      return false;
+   }
    return true;
 }
 
@@ -31,8 +44,22 @@ DBAppendCmd::exec(const string& option)
 {
    // TODO...
    // check option
+   vector<string> options;
+   if (!CmdExec::lexOptions(option, options, 2))
+      return CmdExec::errorOption(CMD_OPT_EXTRA , options[2]);
 
-   return CMD_EXEC_DONE;
+   if (options.empty())
+      return CmdExec::errorOption(CMD_OPT_MISSING, "");
+
+   int value = 0;
+   if (!isValidVarName(options[0]))
+      return CmdExec::errorOption(CMD_OPT_ILLEGAL, options[0]);
+   if (!myStr2Int(options[1], value))
+      return CmdExec::errorOption(CMD_OPT_ILLEGAL, options[1]);
+   else {
+      dbjson.add(DBJsonElem(options[0], value));
+      return CMD_EXEC_DONE;
+   }
 }
 
 void
@@ -54,13 +81,13 @@ DBAppendCmd::help() const
 //----------------------------------------------------------------------
 CmdExecStatus
 DBAveCmd::exec(const string& option)
-{  
+{
    // check option
    if (!CmdExec::lexNoOption(option))
       return CMD_EXEC_ERROR;
 
    float a = dbjson.ave();
-   if (a == NAN) {
+   if (isnan(a)) {
       cerr << "Error: The average of the DB is nan." << endl;
       return CMD_EXEC_ERROR;
    }
@@ -74,7 +101,7 @@ DBAveCmd::exec(const string& option)
 
 void
 DBAveCmd::usage(ostream& os) const
-{     
+{
    os << "Usage: DBAVerage" << endl;
 }
 
@@ -91,7 +118,7 @@ DBAveCmd::help() const
 //----------------------------------------------------------------------
 CmdExecStatus
 DBCountCmd::exec(const string& option)
-{  
+{
    // check option
    if (!CmdExec::lexNoOption(option))
       return CMD_EXEC_ERROR;
@@ -109,7 +136,7 @@ DBCountCmd::exec(const string& option)
 
 void
 DBCountCmd::usage(ostream& os) const
-{     
+{
    os << "Usage: DBCount" << endl;
 }
 
@@ -126,7 +153,7 @@ DBCountCmd::help() const
 //----------------------------------------------------------------------
 CmdExecStatus
 DBMaxCmd::exec(const string& option)
-{  
+{
    // check option
    if (!CmdExec::lexNoOption(option))
       return CMD_EXEC_ERROR;
@@ -144,7 +171,7 @@ DBMaxCmd::exec(const string& option)
 
 void
 DBMaxCmd::usage(ostream& os) const
-{     
+{
    os << "Usage: DBMAx" << endl;
 }
 
@@ -161,7 +188,7 @@ DBMaxCmd::help() const
 //----------------------------------------------------------------------
 CmdExecStatus
 DBMinCmd::exec(const string& option)
-{  
+{
    // check option
    if (!CmdExec::lexNoOption(option))
       return CMD_EXEC_ERROR;
@@ -179,7 +206,7 @@ DBMinCmd::exec(const string& option)
 
 void
 DBMinCmd::usage(ostream& os) const
-{     
+{
    os << "Usage: DBMIn" << endl;
 }
 
@@ -196,10 +223,26 @@ DBMinCmd::help() const
 //----------------------------------------------------------------------
 CmdExecStatus
 DBPrintCmd::exec(const string& option)
-{  
+{
    // TODO...
+   vector<string> options;
+   if (!CmdExec::lexOptions(option, options)) return CMD_EXEC_ERROR;
 
-   return CMD_EXEC_DONE;
+   if (options.empty()){
+      cout << dbjson << endl;
+      return CMD_EXEC_DONE;
+   }
+   else if (options.size() > 1)
+      return CmdExec::errorOption(CMD_OPT_EXTRA,options[1]);
+   else {
+      for(size_t i = 0; i < dbjson.size(); ++i){
+         if (!options[0].compare(dbjson[i].key())){
+            cout << "{ " << dbjson[i] << " }" << endl;
+            return CMD_EXEC_DONE;
+         }
+      }
+   }
+   return CMD_EXEC_TOT;
 }
 
 void
@@ -317,7 +360,7 @@ DBSortCmd::help() const
 //----------------------------------------------------------------------
 CmdExecStatus
 DBSumCmd::exec(const string& option)
-{  
+{
    // check option
    if (!CmdExec::lexNoOption(option))
       return CMD_EXEC_ERROR;
@@ -333,7 +376,7 @@ DBSumCmd::exec(const string& option)
 
 void
 DBSumCmd::usage(ostream& os) const
-{     
+{
    os << "Usage: DBSUm" << endl;
 }
 
@@ -343,4 +386,3 @@ DBSumCmd::help() const
    cout << setw(15) << left << "DBSUm: "
         << "compute the summation of the DB" << endl;
 }
-

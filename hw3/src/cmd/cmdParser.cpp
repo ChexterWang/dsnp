@@ -98,6 +98,9 @@ void
 CmdParser::printHelps() const
 {
    // TODO...
+   for(map<const string, CmdExec*>::const_iterator it = _cmdMap.begin(); it != _cmdMap.end(); ++it)
+      it->second->help();
+   cout << endl;
 }
 
 void
@@ -140,14 +143,20 @@ CmdParser::parseCmd(string& option)
 
    // TODO...
    assert(str[0] != 0 && str[0] != ' ');
-   return NULL;
+   string cmd = "";
+   size_t opt = myStrGetTok(str, cmd);
+   if(getCmd(cmd)){
+      myStrGetTok(str, option, opt); //TODO
+      return getCmd(cmd);
+   }
+   else return NULL;
 }
 
 // Remove this function for TODO...
 //
 // This function is called by pressing 'Tab'.
 // It is to list the partially matched commands.
-// "str" is the partial string before current cursor position. It can be 
+// "str" is the partial string before current cursor position. It can be
 // a null string, or begin with ' '. The beginning ' ' will be ignored.
 //
 // Several possibilities after pressing 'Tab'
@@ -253,7 +262,7 @@ CmdParser::parseCmd(string& option)
 //    [After] print out the single file name followed by a ' '
 //    // e.g. in hw3/bin
 //    cmd> help mydb $
-//    ==> If "tab" is pressed again, make a beep sound and DO NOT re-print 
+//    ==> If "tab" is pressed again, make a beep sound and DO NOT re-print
 //        the singly-matched file
 //    --- 6.2 ---
 //    [Before] with a prefix and with mutiple matched files
@@ -274,7 +283,7 @@ CmdParser::parseCmd(string& option)
 //    cmd> help MustE$aa
 //    [After] insert the remaining of the matched file name followed by a ' '
 //    cmd> help MustExist.txt $aa
-//    ==> If "tab" is pressed again, make a beep sound and DO NOT re-print 
+//    ==> If "tab" is pressed again, make a beep sound and DO NOT re-print
 //        the singly-matched file
 //    --- 6.5 ---
 //    [Before] with a prefix and NO matched file
@@ -312,6 +321,9 @@ CmdParser::getCmd(string cmd)
 {
    CmdExec* e = 0;
    // TODO...
+   for(map<const string, CmdExec*>::const_iterator it = _cmdMap.begin(); it != _cmdMap.end(); ++it){
+      if(myStrNCmp(it->first, cmd, it->first.size()) == 0) return it->second;
+   }
    return e;
 }
 
@@ -404,4 +416,3 @@ CmdExec::errorOption(CmdOptionError err, const string& opt) const
    }
    return CMD_EXEC_ERROR;
 }
-
