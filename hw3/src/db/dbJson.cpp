@@ -136,12 +136,13 @@ int DBJson::min(size_t& idx) const {
      return minN;
    } else {
      minN = _obj.at(0).value();
-     idx = 0;
+     int i = 0;
      for(DBJsonElem dbElm: _obj){
        if(dbElm.value() < minN){
-         minN = dbElm.value();
-         idx++;
+          minN = dbElm.value();
+          idx = i;
        }
+       i++;
      }
      return 0;
    }

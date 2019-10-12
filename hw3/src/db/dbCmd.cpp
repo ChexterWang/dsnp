@@ -235,6 +235,7 @@ DBPrintCmd::exec(const string& option)
             return CMD_EXEC_DONE;
          }
       }
+      cerr << "Error: No JSON element with key \"" << options[0] << "\" is found." << endl;
    }
    return CMD_EXEC_TOT;
 }
