@@ -12,13 +12,14 @@
 #include "util.h"
 #include "cmdParser.h"
 
+#define MAX_RECUR_DEPTH 1024
+
 using namespace std;
 
 //----------------------------------------------------------------------
 //    External funcitons
 //----------------------------------------------------------------------
 void mybeep();
-
 
 //----------------------------------------------------------------------
 //    Member Function for class cmdParser
@@ -28,8 +29,19 @@ void mybeep();
 bool
 CmdParser::openDofile(const string& dof)
 {
-   // TODO...
-   _dofile = new ifstream(dof.c_str());
+   // TODO...handle recursive open
+   if(_dofile != 0)
+      _dofileStack.push(_dofile);
+   if(_dofileStack.size() != MAX_RECUR_DEPTH)
+      _dofile = new ifstream(dof.c_str());
+   else{
+      _dofile = _dofileStack.top();
+      _dofileStack.pop();
+   }
+   if (!_dofile->is_open()) {
+      closeDofile();
+      return false;
+   }
    return true;
 }
 
@@ -39,7 +51,14 @@ CmdParser::closeDofile()
 {
    assert(_dofile != 0);
    // TODO...
-   delete _dofile;
+   if(_dofileStack.size() != 0){
+      _dofile = _dofileStack.top();
+      _dofileStack.pop();
+   }
+   else{
+      _dofile = NULL;
+      delete _dofile;
+   }
 }
 
 // Return false if registration fails
@@ -72,11 +91,10 @@ CmdParser::regCmd(const string& cmd, unsigned nCmp, CmdExec* e)
    return (_cmdMap.insert(CmdRegPair(mandCmd, e))).second;
 }
 
-// Return false on "quit" or if excetion happens
-CmdExecStatus
-CmdParser::execOneCmd()
-{
+// Return false on "quit" or if exception happens
+CmdExecStatus CmdParser::execOneCmd() {
    bool newCmd = false;
+   bool cmdNotFound = false;
    if (_dofile != 0)
       newCmd = readCmd(*_dofile);
    else
@@ -86,10 +104,73 @@ CmdParser::execOneCmd()
    if (newCmd) {
       string option;
       CmdExec* e = parseCmd(option);
-      if (e != 0)
-         return e->exec(option);
+      if (e != 0) return e->exec(option);
+      cmdNotFound = true;
+   }
+
+   if(cmdNotFound) {
+      string err;
+      myStrGetTok(_history.back(), err);
+      cerr << "Illegal command!! (" << err << ")" << endl;
+      cmdNotFound = false;
    }
    return CMD_EXEC_NOP;
+}
+
+//
+// Parse the command from _history.back();
+// Let string str = _history.back();
+//
+// 1. Read the command string (may contain multiple words) from the leading
+//    part of str (i.e. the first word) and retrive the corresponding
+//    CmdExec* from _cmdMap
+//    ==> If command not found, print to cerr the following message:
+//        Illegal command!! "(string cmdName)"
+//    ==> return it at the end.
+// 2. Call getCmd(cmd) to retrieve command from _cmdMap.
+//    "cmd" is the first word of "str".
+// 3. Get the command options from the trailing part of str (i.e. second
+//    words and beyond) and store them in "option"
+//
+CmdExec* CmdParser::parseCmd(string& option){
+   assert(_tempCmdStored == false);
+   assert(!_history.empty());
+   string str = _history.back();
+
+   // TODO...
+   assert(str[0] != 0 && str[0] != ' ');
+   string cmd = "";
+   size_t opt = myStrGetTok(str, cmd);
+   if(getCmd(cmd)){
+      if(opt != myStrGetTok(str, option, opt)) option = str.substr(opt);
+      return getCmd(cmd);
+   }
+   else{
+      return NULL;
+   }
+}
+
+// cmd is a copy of the original input
+//
+// return the corresponding CmdExec* if "cmd" matches any command in _cmdMap
+// return 0 if not found.
+//
+// Please note:
+// ------------
+// 1. The mandatory part of the command string (stored in _cmdMap) must match
+// 2. The optional part can be partially omitted.
+// 3. All string comparison are "case-insensitive".
+//
+CmdExec*
+CmdParser::getCmd(string cmd)
+{
+   CmdExec* e = 0;
+   // TODO...
+   for(map<const string, CmdExec*>::const_iterator it = _cmdMap.begin(); it != _cmdMap.end(); ++it){
+      string str = it->first + it->second->getOptCmd();
+      if(myStrNCmp(str, cmd, it->first.size()) == 0) return it->second;
+   }
+   return e;
 }
 
 // For each CmdExec* in _cmdMap, call its "help()" to print out the help msg.
@@ -119,38 +200,6 @@ CmdParser::printHistory(int nPrint) const
 }
 
 
-//
-// Parse the command from _history.back();
-// Let string str = _history.back();
-//
-// 1. Read the command string (may contain multiple words) from the leading
-//    part of str (i.e. the first word) and retrive the corresponding
-//    CmdExec* from _cmdMap
-//    ==> If command not found, print to cerr the following message:
-//        Illegal command!! "(string cmdName)"
-//    ==> return it at the end.
-// 2. Call getCmd(cmd) to retrieve command from _cmdMap.
-//    "cmd" is the first word of "str".
-// 3. Get the command options from the trailing part of str (i.e. second
-//    words and beyond) and store them in "option"
-//
-CmdExec*
-CmdParser::parseCmd(string& option)
-{
-   assert(_tempCmdStored == false);
-   assert(!_history.empty());
-   string str = _history.back();
-
-   // TODO...
-   assert(str[0] != 0 && str[0] != ' ');
-   string cmd = "";
-   size_t opt = myStrGetTok(str, cmd);
-   if(getCmd(cmd)){
-      myStrGetTok(str, option, opt); //TODO
-      return getCmd(cmd);
-   }
-   else return NULL;
-}
 
 // Remove this function for TODO...
 //
@@ -304,29 +353,6 @@ CmdParser::listCmd(const string& str)
 {
    // TODO...
 }
-
-// cmd is a copy of the original input
-//
-// return the corresponding CmdExec* if "cmd" matches any command in _cmdMap
-// return 0 if not found.
-//
-// Please note:
-// ------------
-// 1. The mandatory part of the command string (stored in _cmdMap) must match
-// 2. The optional part can be partially omitted.
-// 3. All string comparison are "case-insensitive".
-//
-CmdExec*
-CmdParser::getCmd(string cmd)
-{
-   CmdExec* e = 0;
-   // TODO...
-   for(map<const string, CmdExec*>::const_iterator it = _cmdMap.begin(); it != _cmdMap.end(); ++it){
-      if(myStrNCmp(it->first, cmd, it->first.size()) == 0) return it->second;
-   }
-   return e;
-}
-
 
 //----------------------------------------------------------------------
 //    Member Function for class CmdExec

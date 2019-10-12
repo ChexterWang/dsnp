@@ -45,21 +45,17 @@ DBAppendCmd::exec(const string& option)
    // TODO...
    // check option
    vector<string> options;
-   if (!CmdExec::lexOptions(option, options, 2))
-      return CmdExec::errorOption(CMD_OPT_EXTRA , options[2]);
-
-   if (options.empty())
-      return CmdExec::errorOption(CMD_OPT_MISSING, "");
-
    int value = 0;
+   if (!CmdExec::lexOptions(option, options, 2)) return CMD_EXEC_ERROR;
    if (!isValidVarName(options[0]))
       return CmdExec::errorOption(CMD_OPT_ILLEGAL, options[0]);
    if (!myStr2Int(options[1], value))
       return CmdExec::errorOption(CMD_OPT_ILLEGAL, options[1]);
-   else {
-      dbjson.add(DBJsonElem(options[0], value));
-      return CMD_EXEC_DONE;
+   if(!dbjson.add(DBJsonElem(options[0], value))){
+      cerr << "Error: Element with key \"" << options[0] << "\" already exists!!" << endl;
+      return CMD_EXEC_ERROR;
    }
+   return CMD_EXEC_DONE;
 }
 
 void
@@ -227,13 +223,11 @@ DBPrintCmd::exec(const string& option)
    // TODO...
    vector<string> options;
    if (!CmdExec::lexOptions(option, options)) return CMD_EXEC_ERROR;
-
    if (options.empty()){
-      cout << dbjson << endl;
+      cout << dbjson << "Total JSON elements: " << dbjson.size() << endl;
       return CMD_EXEC_DONE;
    }
-   else if (options.size() > 1)
-      return CmdExec::errorOption(CMD_OPT_EXTRA,options[1]);
+   else if (options.size() > 1) return CmdExec::errorOption(CMD_OPT_EXTRA,options[1]);
    else {
       for(size_t i = 0; i < dbjson.size(); ++i){
          if (!options[0].compare(dbjson[i].key())){
