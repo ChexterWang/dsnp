@@ -29,7 +29,7 @@ void mybeep();
 bool
 CmdParser::openDofile(const string& dof)
 {
-   // TODO...handle recursive open
+   // TODO...
    if(_dofile != 0)
       _dofileStack.push(_dofile);
    if(_dofileStack.size() != MAX_RECUR_DEPTH)
@@ -51,15 +51,12 @@ CmdParser::closeDofile()
 {
    assert(_dofile != 0);
    // TODO...
+   _dofile->close();
+   _dofile = NULL;
+   delete _dofile;
    if(_dofileStack.size() != 0){
-      _dofile->close();
       _dofile = _dofileStack.top();
       _dofileStack.pop();
-   }
-   else{
-      _dofile->close();
-      _dofile = NULL;
-      delete _dofile;
    }
 }
 
