@@ -297,10 +297,10 @@ DBReadCmd::exec(const string& option)
       cout << "DB is replaced..." << endl;
       dbjson.reset();
    }
-//   if (!(ifs >> dbtbl)) return CMD_EXEC_ERROR;
+   //   if (!(ifs >> dbtbl)) return CMD_EXEC_ERROR;
    ifs >> dbjson;
    cout << "\"" << fileName << "\" was read in successfully." << endl;
-
+   ifs.close();
    return CMD_EXEC_DONE;
 }
 

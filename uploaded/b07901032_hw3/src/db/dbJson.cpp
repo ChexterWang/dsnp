@@ -117,17 +117,14 @@ int DBJson::max(size_t& idx) const {
    } else {
      maxN = _obj.at(0).value();
      idx = 0;
-     for(DBJsonElem dbElm: _obj){
-       if(dbElm.value() > maxN){
-         maxN = dbElm.value();
-         idx++;
-       }
+     for(size_t i = 0; i < _obj.size(); ++i){
+        if(_obj[i].value() > maxN) idx = i;
      }
      return 0;
    }
 }
 
-// If DBJson is empty, set idx to size() and return INT_MIN
+// If DBJson is empty, set idx to size() and return INT_MAX
 int DBJson::min(size_t& idx) const {
    // TODO
    int minN = INT_MAX;
@@ -135,14 +132,10 @@ int DBJson::min(size_t& idx) const {
      idx = _obj.size();
      return minN;
    } else {
-     minN = _obj.at(0).value();
-     int i = 0;
-     for(DBJsonElem dbElm: _obj){
-       if(dbElm.value() < minN){
-          minN = dbElm.value();
-          idx = i;
-       }
-       i++;
+     minN = _obj[0].value();
+     idx = 0;
+     for(size_t i = 0; i < _obj.size(); ++i){
+        if(_obj[i].value() < minN) idx = i;
      }
      return 0;
    }

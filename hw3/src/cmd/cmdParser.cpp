@@ -52,10 +52,12 @@ CmdParser::closeDofile()
    assert(_dofile != 0);
    // TODO...
    if(_dofileStack.size() != 0){
+      _dofile->close();
       _dofile = _dofileStack.top();
       _dofileStack.pop();
    }
    else{
+      _dofile->close();
       _dofile = NULL;
       delete _dofile;
    }
