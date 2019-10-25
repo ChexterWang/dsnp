@@ -18,4 +18,8 @@
 **/hw3/src/*/*.o
 **/hw3/src/*/*.mak
 **/hw3/lib
-**/hw3/dofiles/*
+**/hw3/dofiles
+
+**/hw4/tests
+**/hw4/lib
+**/hw4/src/*/*.o
