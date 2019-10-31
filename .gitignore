@@ -21,5 +21,18 @@
 **/hw3/dofiles
 
 **/hw4/tests
+**/hw4/include
 **/hw4/lib
-**/hw4/src/*/*.o
+**/hw4/ref
+**/hw4/src/cmd
+**/hw4/src/main
+**/hw4/src/mem/memCmd.h
+**/hw4/src/mem/memCmd.o
+**/hw4/src/mem/memTest*
+**/hw4/src/util
+**/hw4/src/Mak*
+**/hw4/src/*/*mak*
+**/hw4/Homework_4.pdf
+**/hw4/Makefile
+**/hw4/Must*
+**/hw4/SelfCheck

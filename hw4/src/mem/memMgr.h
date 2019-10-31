@@ -17,7 +17,7 @@
 using namespace std;
 
 // Turn this on for debugging
-// #define MEM_DEBUG
+#define MEM_DEBUG
 
 //--------------------------------------------------------------------------
 // Define MACROs
@@ -36,22 +36,34 @@ public:                                                                     \
 private:                                                                    \
    static MemMgr<T>* const _memMgr
 
-// You should use the following two MACROs whenever possible to 
+// You should use the following two MACROs whenever possible to
 // make your code 64/32-bit platform independent.
 // DO NOT use 4 or 8 for sizeof(size_t) in your code
 //
 #define SIZE_T      sizeof(size_t)
 #define SIZE_T_1    (sizeof(size_t) - 1)
 
-// TODO: Define them by SIZE_T and/or SIZE_T_1 MACROs.
+// Define them by SIZE_T and/or SIZE_T_1 MACROs.
 //
-// To promote 't' to the nearest multiple of SIZE_T; 
+// TODO: To promote 't' to the nearest multiple of SIZE_T;
 // e.g. Let SIZE_T = 8;  toSizeT(7) = 8, toSizeT(12) = 16
-#define toSizeT(t)      0  // TODO
+#define toSizeT(t)                     \
+({                                     \
+   size_t _t = t;                      \
+   _t = (_t / SIZE_T + 1) * SIZE_T;    \
+   _t;                                 \
+})
+
+// Define them by SIZE_T and/or SIZE_T_1 MACROs.
 //
-// To demote 't' to the nearest multiple of SIZE_T
+// TODO: To demote 't' to the nearest multiple of SIZE_T
 // e.g. Let SIZE_T = 8;  downtoSizeT(9) = 8, downtoSizeT(100) = 96
-#define downtoSizeT(t)  0  // TODO
+#define downtoSizeT(t)              \
+({                                  \
+   size_t _t = t;                   \
+   _t = (_t / SIZE_T) * SIZE_T;     \
+   _t;                              \
+})
 
 // R_SIZE is the size of the recycle list
 #define R_SIZE 256
@@ -88,11 +100,15 @@ class MemBlock
    // 3. The return memory address is stored in "ret"
    // 4. Return false if not enough memory
    bool getMem(size_t t, T*& ret) {
-      // TODO
+      // TODO: getMem: get memory from current block, move _ptr for memory.
+      t = toSizeT(t);
+      if(_ptr + t > _end) return false;
+      ret = (T*)(void*)_ptr;
+      _ptr += t;
       return true;
    }
    size_t getRemainSize() const { return size_t(_end - _ptr); }
-      
+
    MemBlock<T>* getNextBlock() const { return _nextBlock; }
 
    // Data members
@@ -121,24 +137,24 @@ class MemRecycleList
    void setNextList(MemRecycleList<T>* l) { _nextList = l; }
    // pop out the first element in the recycle list
    T* popFront() {
-      // TODO
+      // TODO: popFront
       return 0;
    }
    // push the element 'p' to the beginning of the recycle list
    void  pushFront(T* p) {
-      // TODO
+      // TODO: pushFront
    }
    // Release the memory occupied by the recycle list(s)
    // DO NOT release the memory occupied by MemMgr/MemBlock
    void reset() {
-      // TODO
+      // TODO: delete those list blocks that _arrSize%256 = *this->_arrSize
    }
 
    // Helper functions
    // ----------------
    // count the number of elements in the recycle list
    size_t numElm() const {
-      // TODO
+      // TODO: numElem
       return 0;
    }
 
@@ -205,7 +221,7 @@ public:
       #ifdef MEM_DEBUG
       cout << "Calling freeArr...(" << p << ")" << endl;
       #endif // MEM_DEBUG
-      // TODO
+      // TODO: freeArr
       // Get the array size 'n' stored by system,
       // which is also the _recycleList index
       size_t n = 0;
@@ -258,7 +274,7 @@ private:
    size_t getArraySize(size_t t) const {
       assert(t % SIZE_T == 0);
       assert(t >= S);
-      // TODO
+      // TODO: getArraySize
       return 0;
    }
    // Go through _recycleList[m], its _nextList, and _nexList->_nextList, etc,
@@ -288,7 +304,7 @@ private:
       //    Print this message for exception
       //    cerr << "Requested memory (" << t << ") is greater than block size"
       //         << "(" << _blockSize << "). " << "Exception raised...\n";
-      // TODO
+      // TODO: handling the requested memory being too large error
 
       // 3. Check the _recycleList first...
       //    Print this message for memTest.debug
@@ -298,7 +314,7 @@ private:
       //    => 'n' is the size of array
       //    => "ret" is the return address
       size_t n = getArraySize(t);
-      // TODO
+      // TODO: check if there is a good deleted block
 
       // If no match from recycle list...
       // 4. Get the memory from _activeBlock
@@ -313,7 +329,7 @@ private:
       //    #ifdef MEM_DEBUG
       //    cout << "New MemBlock... " << _activeBlock << endl;
       //    #endif // MEM_DEBUG
-      // TODO
+      // TODO: delete remaining in _activeBlock and open new one
 
       // 6. At the end, print out the acquired memory address
       #ifdef MEM_DEBUG
@@ -323,7 +339,7 @@ private:
    }
    // Get the currently allocated number of MemBlock's
    size_t getNumBlocks() const {
-      // TODO
+      // TODO: getNumBlocks
       return 0;
    }
 
