@@ -99,8 +99,8 @@ public:
    iterator begin() const { return _head; }
    iterator end() const { return _head->_prev; }
    bool empty() const {
-      if(_head == _head->_prev) return false;
-      else return true;
+      if(_head == _head->_prev) return true;
+      else return false;
    }
    size_t size() const {
       size_t s = 0;
@@ -138,10 +138,13 @@ public:
 
    // return false if nothing to erase
    bool erase(iterator pos) {
-      if(empty()) return false;
-      pos._node->_prev->_next = pos._node->_next;
-      pos._node->_next->_prev = pos._node->_prev;
-      delete pos._node;
+      if(empty() || pos == end()) return false;
+      else if(pos == begin()) pop_front();
+      else{
+         pos._node->_prev->_next = pos._node->_next;
+         pos._node->_next->_prev = pos._node->_prev;
+         delete pos._node;
+      }
       return true;
    }
    bool erase(const T& x) {
@@ -157,17 +160,18 @@ public:
    }
 
    void clear() {
-      for(DListNode<T>* tmp = _head; size();
-          tmp = tmp->_next){
+      DListNode<T>* tmp = _head;
+      for(; tmp != _head->_prev; tmp = tmp->_next)
          delete tmp;
-      }
+      _head = tmp;
+      _head->_prev = _head->_next = _head;
    }  // delete all nodes except for the dummy node
 
    void sort() const {
       for(iterator it = begin(); it != end(); ++it){
-         iterator tmp = begin();
-         for(iterator itt = it; it != end(); ++it)
-            tmp = (*itt < *tmp) ? it : tmp;
+         iterator tmp = it;
+         for(iterator itt = it; itt != end(); ++itt)
+            tmp = (*itt < *tmp) ? itt : tmp;
          std::swap(it._node->_data, tmp._node->_data);
       }
    }
