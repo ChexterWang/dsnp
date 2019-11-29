@@ -39,7 +39,7 @@ class DList
 {
 public:
    // TODO: decide the initial value for _isSorted
-   DList() {
+   DList(): _isSorted(false) {
       _head = new DListNode<T>(T());
       _head->_prev = _head->_next = _head; // _head is a dummy node
    }
@@ -115,6 +115,7 @@ public:
          tmp->_prev->_next = tmp;
       }
       else _head = _head->_next = _head->_prev = tmp;
+      _isSorted = false;
    }
    void pop_front() {
       if(size()){
@@ -140,6 +141,7 @@ public:
    bool erase(iterator pos) {
       if(empty() || pos == end()) return false;
       else if(pos == begin()) pop_front();
+      else if(pos == --end()) pop_back();
       else{
          pos._node->_prev->_next = pos._node->_next;
          pos._node->_next->_prev = pos._node->_prev;
@@ -168,12 +170,14 @@ public:
    }  // delete all nodes except for the dummy node
 
    void sort() const {
+      if(_isSorted) return;
       for(iterator it = begin(); it != end(); ++it){
          iterator tmp = it;
          for(iterator itt = it; itt != end(); ++itt)
             tmp = (*itt < *tmp) ? itt : tmp;
          std::swap(it._node->_data, tmp._node->_data);
       }
+      _isSorted = true;
    }
 
 private:

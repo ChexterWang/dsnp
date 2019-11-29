@@ -9,6 +9,14 @@
 #ifndef BST_H
 #define BST_H
 
+// use for print -verbose
+#ifndef PF
+#define PF 8
+#endif
+#ifndef LEAF
+#define LEAF true
+#endif
+
 #include <vector>
 #include <stack>
 
@@ -28,25 +36,25 @@ class BSTreeNode
    friend class BSTree<T>;
    friend class BSTree<T>::iterator;
    BSTreeNode(const T& d, BSTreeNode<T>* r = NULL, BSTreeNode<T>* l = NULL)
-   : data(d), right(r), left(l) {}
+   : data(d), _right(r), _left(l) {}
    T                 data;
-   BSTreeNode<T>*    right;
-   BSTreeNode<T>*    left;
+   BSTreeNode<T>*    _right;
+   BSTreeNode<T>*    _left;
 };
 
 template <class T>
-class itNode
+class traceNode
 {
    friend class BSTree<T>;
    friend class BSTree<T>::iterator;
-   itNode(BSTreeNode<T>* n, char d): node(n), dir(d){}
-   BSTreeNode<T>*    node;
+   traceNode(BSTreeNode<T>* n, char d): tnode(n), dir(d){}
+   BSTreeNode<T>*    tnode;
    char              dir;
-   bool operator != (const itNode& i) const{
-      return ((node != i.node) || (dir != i.dir)) ? true : false;
+   bool operator != (const traceNode& i) const{
+      return ((tnode != i.tnode) || (dir != i.dir)) ? true : false;
    }
-   bool operator == (const itNode& i) const{
-      return ((node == i.node) && (dir == i.dir)) ? true : false;
+   bool operator == (const traceNode& i) const{
+      return ((tnode == i.tnode) && (dir == i.dir)) ? true : false;
    }
 };
 
@@ -56,7 +64,7 @@ class BSTree
    // TODO: design your own class!!
 public:
    BSTree(){
-      root = _end = new BSTreeNode<T>(T());
+      _root = _end = new BSTreeNode<T>(T());
       _size = 0;
    }
    ~BSTree(){}
@@ -65,189 +73,176 @@ public:
       friend class BSTree;
    public:
       iterator(){}
-      iterator(BSTreeNode<T>* n) : mynode(n) {}
-      iterator(int i) : mynode(0) {}
-      iterator(const iterator& i) : trace(i.trace), mynode(i.mynode) {}
+      iterator(BSTreeNode<T>* n) : _node(n) {}
+      iterator(int i) : _node(0) {}
+      iterator(const iterator& i) : _trace(i._trace), _node(i._node) {}
       ~iterator(){}
-      const T& operator * () const { return mynode->data; }
-      T& operator * (){ return mynode->data; }
+      const T& operator * () const { return _node->data; }
+      T& operator * (){ return _node->data; }
       iterator& operator ++ (){ next(); return *this; }
       iterator operator ++ (int){ iterator tmp(*this); next(); return tmp; }
       iterator& operator -- (){ prev(); return *this; }
       iterator operator -- (int){ iterator tmp(*this); prev(); return tmp; }
-      iterator& operator = (const iterator& i){ trace=i.trace; mynode=i.mynode; return *this; }
+      iterator& operator = (const iterator& i){ _trace=i._trace; _node=i._node; return *this; }
       bool operator != (const iterator& i) const {
-         if(trace.size()) return ( trace.top()!=i.trace.top() )?true:false;
-         else return ( mynode != i.mynode )?true:false;
+         if(_trace.size() && i._trace.size()) return ( _trace.top()!=i._trace.top() )?true:false;
+         else return ( _node != i._node )?true:false;
       }
       bool operator == (const iterator& i) const {
-         if(trace.size()) return ( trace.top()==i.trace.top() )?true:false;
-         else return ( mynode == i.mynode )?true:false;
+         if(_trace.size() && i._trace.size()) return ( _trace.top()==i._trace.top() )?true:false;
+         else return ( _node == i._node )?true:false;
       }
    private:
-      stack<itNode<T> > trace;
-      BSTreeNode<T>*    mynode;
+      stack<traceNode<T> > _trace;
+      BSTreeNode<T>*    _node;
       void addTrace(BSTreeNode<T>* n, char d){
-         trace.push(move(itNode<T>(n, d)));
+         _trace.push(move(traceNode<T>(n, d)));
       }
       void next(){
-         if(mynode->right){
-            addTrace(mynode, '>');
-            mynode = mynode->right;
-            for(; mynode->left; mynode = mynode->left)
-               addTrace(mynode, '<');
-         } else {
-            while(trace.size() && trace.top().dir == '>')
-               trace.pop();
-            mynode = trace.top().node;
-            trace.pop();
+         if(_node->_right){
+            addTrace(_node, '>');
+            _node = _node->_right;
+            for(; _node->_left; _node = _node->_left) addTrace(_node, '<');
+         }
+         else {
+            while(_trace.size() && _trace.top().dir == '>') _trace.pop();
+            _node = _trace.top().tnode;
+            _trace.pop();
          }
       }
       void prev(){
-         if(mynode->left){
-            addTrace(mynode, '<');
-            mynode = mynode->left;
-            for(; mynode->right; mynode = mynode->right)
-               addTrace(mynode, '>');
-         } else {
-            while(trace.size() && trace.top().dir == '<')
-               trace.pop();
-            if(trace.size()){
-               mynode = trace.top().node;
-               trace.pop();
-            }
-            else mynode = NULL;
+         if(_node->_left){
+            addTrace(_node, '<');
+            _node = _node->_left;
+            for(; _node->_right; _node = _node->_right) addTrace(_node, '>');
          }
-      }
-      void reset(){
-         while(trace.size()) trace.pop();
-         mynode = 0;
+         else {
+            while(_trace.size() && _trace.top().dir == '<') _trace.pop();
+            if(_trace.size()){ _node = _trace.top().tnode; _trace.pop(); }
+            else _node = NULL;
+         }
       }
 
    };
 
    iterator begin() const {
       if(!_size) return 0;
-      iterator it(root);
-      for(; it.mynode->left; it.mynode = it.mynode->left)
-         it.addTrace(it.mynode, '<');
+      iterator it(_root);
+      for(; it._node->_left; it._node = it._node->_left)
+         it.addTrace(it._node, '<');
       return it;
    }
    iterator end() const {
       if(!_size) return 0;
-      iterator it(root);
-      for(; it.mynode->right; it.mynode = it.mynode->right)
-         it.addTrace(it.mynode, '>');
+      iterator it(_root);
+      for(; it._node->_right; it._node = it._node->_right)
+         it.addTrace(it._node, '>');
       return it;
    }
    void insert(const T& x){
-      if(!_size){ root = new BSTreeNode<T>(x, _end); ++_size; return; }
-      itt.reset();
-      bsfindcandy(root, x);
-      if(itt == end()) --itt;
-      if( (itt.mynode->data == x) || (itt == --end()) )
-         itt.mynode->right = new BSTreeNode<T>(x, itt.mynode->right);
-      else if(itt.mynode->data > x)
-         itt.mynode->left = new BSTreeNode<T>(x);
-      else itt.mynode->right = new BSTreeNode<T>(x);
+      if(!_size){ _root = new BSTreeNode<T>(x, _end); ++_size; return; }
+      iterator it(_root);
+      bsfindcandy(_root, x, it);
+      if(it._node->data > x)
+         it._node->_left = new BSTreeNode<T>(x);
+      else if((it._node->data == x) || (it == --end()))
+         it._node->_right = new BSTreeNode<T>(x, it._node->_right);
+      else it._node->_right = new BSTreeNode<T>(x);
       ++_size;
    }
    iterator find(const T& x) {
       if(!_size) return end();
-      itt.reset();
-      bsfindcandy(root, x);
-      if(itt.mynode->data == x) return itt;
+      iterator it(_root);
+      bsfindcandy(_root, x, it);
+      if(it._node->data == x) return it;
       return end();
    }
    void clear(){
-      deltree(root);
-      root = _end = new BSTreeNode<T>(T());
+      deltree(_root);
+      _root = _end;
       _size = 0;
-      itt.reset();
    }
    bool erase(iterator pos){
       if( !_size || (pos == end()) ) return false;
-      if(!pos.mynode->left && !pos.mynode->right){
-         if(pos.trace.top().dir == '<')
-            pos.trace.top().node->left = NULL;
-         else pos.trace.top().node->right = NULL;
+      if(!pos._node->_left && !pos._node->_right){
+         if(pos._trace.top().dir == '<')
+            pos._trace.top().tnode->_left = NULL;
+         else pos._trace.top().tnode->_right = NULL;
       }
-      else if(!pos.mynode->left && pos.mynode->right){
-         if(!pos.trace.size())
-            root = pos.mynode->right;
-         else if(pos.trace.top().dir == '>')
-            pos.trace.top().node->right = pos.mynode->right;
-         else pos.trace.top().node->left = pos.mynode->right;
+      else if(!pos._node->_left && pos._node->_right){
+         if(!pos._trace.size())
+            _root = pos._node->_right;
+         else if(pos._trace.top().dir == '>')
+            pos._trace.top().tnode->_right = pos._node->_right;
+         else pos._trace.top().tnode->_left = pos._node->_right;
       }
-      else if(pos.mynode->left && !pos.mynode->right){
-         if(pos.trace.top().dir == '<')
-            pos.trace.top().node->left = pos.mynode->left;
-         else pos.trace.top().node->right = pos.mynode->left;
+      else if(pos._node->_left && !pos._node->_right){
+         if(pos._trace.top().dir == '<')
+            pos._trace.top().tnode->_left = pos._node->_left;
+         else pos._trace.top().tnode->_right = pos._node->_left;
       }
       else if(pos != --end()){
          iterator origin = pos++;
-         origin.mynode->data = pos.mynode->data;
-         if(!pos.trace.size() || (pos.trace.top().dir == '>'))
-            origin.mynode->right = pos.mynode->right;
-         else pos.trace.top().node->left = pos.mynode->right;
+         origin._node->data = pos._node->data;
+         if(!pos._trace.size() || (pos._trace.top().dir == '>'))
+            origin._node->_right = pos._node->_right;
+         else pos._trace.top().tnode->_left = pos._node->_right;
+      }
+      else if((--pos)._trace.size() && pos._trace.top().dir == '<'){
+         iterator prev = pos++;
+         pos._node->data = prev._node->data;
+         pos._node->_left = prev._node->_left;
+         pos._node = prev._node;
       }
       else{
-         iterator origin = pos--;
-         origin.mynode->data = pos.mynode->data;
-         if(pos.trace.top().dir == '<')
-            origin.mynode->left = pos.mynode->left;
-         else{
-            pos.trace.top().node->right = _end;
-            if(origin.trace.size())
-                  origin.trace.top().node->right = origin.mynode->left;
-            else root = origin.mynode->left;
-         }
+         iterator prev = pos++;
+         prev._node->_right = _end;
+         if(pos._trace.size())
+            pos._trace.top().tnode->_right = pos._node->_left;
+         else _root = pos._node->_left;
       }
-      delete pos.mynode;
+      delete pos._node;
       --_size;
-      if(!_size) _end = root;
+      if(!_size) _end = _root;
       return true;
    }
    void pop_front(){ erase(begin()); }
    void pop_back(){ erase(--end()); }
    bool erase(const T& x){ return (erase(find(x))) ? true : false; }
-   void print() const {
-      bsprint(root, 0);
-   }
+   void print() const { bsprint(_root, 0, 'o'); }
    void sort() const {}
    bool empty() const { return (_size) ? false : true; }
    size_t size() const { return _size; }
 
 private:
-   BSTreeNode<T>*    root;
+   BSTreeNode<T>*    _root;
    BSTreeNode<T>*    _end;
    size_t            _size;
-   iterator          itt;
-   void bsfindcandy(BSTreeNode<T>* node, const T& x){
-      if( (node->right) && ((x == node->right->data) || (x > node->data)) ){
-         itt.addTrace(node, '>');
-         bsfindcandy(node->right, x);
+   void bsfindcandy(BSTreeNode<T>*& node, const T& x, iterator& it){
+      if( (node->_right) && (node->_right != _end) &&
+          ((x == node->_right->data) || (x > node->data)) ){
+         it.addTrace(node, '>');
+         bsfindcandy(node->_right, x, it);
       }
-      else if((x < node->data) && (node->left)){
-         itt.addTrace(node, '<');
-         bsfindcandy(node->left, x);
+      else if((node->_left) && (x < node->data)){
+         it.addTrace(node, '<');
+         bsfindcandy(node->_left, x, it);
       }
-      else itt.mynode = node;
+      else it._node = node;
    }
-   void deltree(BSTreeNode<T>* node){
-      if(node->left) deltree(node->left);
-      if(!node->left && !node->right) { delete node; return; }
-      if(node->right) deltree(node->right);
-      if(!node->left && !node->right) { delete node; return; }
+   void deltree(BSTreeNode<T>*& node){
+      if(node == _end) return;
+      if(node->_left) { deltree(node->_left); node->_left = NULL; }
+      if(node->_right) { deltree(node->_right); node->_right = NULL; }
+      delete node;
    }
-   void bsprint(BSTreeNode<T>* node, size_t tab) const {
-      if(node->right) bsprint(node->right, tab+1);
-      if(!node->right)
-         cout << setw(12*(tab+1)) << "----" << "$" << endl;
-      cout << setw(12*tab) << "---" << node->data << endl;
-      if(!node->left)
-         cout << setw(12*(tab+1)) << "----" << "$" << endl;
-      if(node->left) bsprint(node->left, tab+1);
+   void bsprint(BSTreeNode<T>* node, size_t tab, char c) const {
+      if(node->_right) bsprint(node->_right, tab+1, '/');
+      else if(LEAF)    cout << setw(PF*(tab+1)) << '/'  << "----" <<    '$'     << endl;
+      if(node == _end) cout << setw(PF*tab)     <<  c   << "----" << "><(((˚>˚" << endl;
+      else             cout << setw(PF*tab)     <<  c   << "----" << node->data << endl;
+      if(node->_left)  bsprint(node->_left, tab+1,  '\\');
+      else if(LEAF)    cout << setw(PF*(tab+1)) << '\\' << "----" <<    '$'     << endl;
    }
 
 };
