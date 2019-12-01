@@ -15,7 +15,6 @@
 #include <fstream>
 #include <regex>
 #include "cirMgr.h"
-#include "cirGate.h"
 #include "util.h"
 
 using namespace std;
@@ -158,6 +157,35 @@ enum readState{
    ERROR
 };
 
+ostream& operator << (ostream& os, CirMgr& cm){
+   os << cm._max << ", " << cm._input << ", " <<
+   cm._output << ", " << cm._aig << endl;
+   if(cm.pi.size()){
+      os << cm.pi[0];
+      for(size_t i = 1; i < cm.pi.size(); ++i)
+         os << ", " << cm.pi[i];
+      os << endl;
+   }
+   if(cm.po.size()){
+      os << "PO: <" << cm.po[0].first << ", " << cm.po[0].second << ">";
+      for(size_t i = 1; i < cm.po.size(); ++i)
+         os << ", <" << cm.po[i].first << ", " << cm.po[i].second << ">";
+      os << endl;
+   }
+   if(cm.pa.size()){
+      os << "PA: <" << get<0>(cm.pa[0]) << ", " << get<1>(cm.pa[0]) << ", " << get<2>(cm.pa[0]) << ">";
+      for(size_t i = 1; i < cm.pa.size(); ++i)
+         os << ", <" << get<0>(cm.pa[i]) << ", " << get<1>(cm.pa[i]) << ", " << get<2>(cm.pa[i]) << ">";
+      os << endl;
+   }
+   for(size_t i = 0; i < cm._all.size(); ++i){
+      if(cm._all[i]){
+         os << i << ", " << cm._all[i]->getTypeStr() << ", " << cm._all[i]->getLineNo() << endl;
+      }
+   }
+   return os;
+}
+
 /**************************************************************/
 /*   class CirMgr member functions for circuit construction   */
 /**************************************************************/
@@ -192,15 +220,14 @@ CirMgr::readCircuit(const string& fileName)
       if(s == COMMENT) break;
    }
    ifs.close();
-   cout << *this << endl;
+   // cout << *this << endl;
    return true;
 }
 
 bool CirMgr::readHeader(ifstream& fs){
-   regex pattern("^(aag )[0-9]+( )[0-9]+( )[0-9]+( )[0-9]+( )[0-9]+$");
    string str;
    getline(fs, str);
-   if(regex_match(str, pattern)){
+   if(regex_match(str, regex("^(aag )[0-9]+( )[0-9]+( )[0-9]+( )[0-9]+( )[0-9]+$"))){
       string tok;
       int i;
       size_t pos = myStrGetTok(str, tok);
@@ -217,23 +244,59 @@ bool CirMgr::readHeader(ifstream& fs){
       pos = myStrGetTok(str, tok, pos);
       myStr2Int(tok, i);
       _aig = unsigned(i);
-      return true;
+      if(_max >= _input + _aig){
+         _all.resize(_max+_output+1);
+         lineNo = 1;
+         return true;
+      }
+      else{
+         lineNo = 0;
+         errMsg = "Number of variables";
+         errInt = _max;
+         return parseError(NUM_TOO_SMALL);
+      }
    }
    else{
       return false;
    }
 }
+
+bool CirMgr::checkLiteral(int i, bool out){
+   if((unsigned)i > _max*2+1){
+      colNo = 0;
+      errMsg = "Number of variables";
+      errInt = i;
+      return parseError(MAX_LIT_ID);
+   }
+   else if(!out){
+      if(!(i/2)){
+         colNo = 0;
+         errInt = i;
+         return parseError(REDEF_CONST);
+      }
+      else if(_all[i/2]){
+         errInt = i;
+         errGate = _all[i/2];
+         return parseError(REDEF_GATE);
+      }
+   }
+   return true;
+}
+
 bool CirMgr::readInput(ifstream& fs){
-   for(int i = 0; i < cm._input; ++i){
-      regex pattern("^[0-9]+$");
+   for(unsigned j = 0; j < _input; ++j){
       string str;
       getline(fs, str);
-      if(regex_match(str, pattern)){
+      if(regex_match(str, regex("^[0-9]*[02468]+$"))){
          string tok;
          int i;
-         size_t pos = myStrGetTok(str, tok);
+         myStrGetTok(str, tok);
          myStr2Int(tok, i);
+         if(!checkLiteral(i, false)) return false;
+         i /= 2;
+         _all[i] = new PiGate(i, lineNo+1);
          pi.push_back(move(unsigned(i)));
+         ++lineNo;
       }
       else{
          return false;
@@ -241,10 +304,50 @@ bool CirMgr::readInput(ifstream& fs){
    }
    return true;
 }
+
 bool CirMgr::readOutput(ifstream& fs){
+   for(unsigned j = 0; j < _output; ++j){
+      string str;
+      getline(fs, str);
+      if(regex_match(str, regex("^[0-9]+$"))){
+         string tok;
+         int i;
+         myStrGetTok(str, tok);
+         myStr2Int(tok, i);
+         if(!checkLiteral(i, true)) return false;
+         _all[_max+j+1] = new PoGate(_max+j+1, lineNo+1, i/2, i%2);
+         po.push_back(pair<unsigned, unsigned>(_max+j+1, i/2));
+         ++lineNo;
+      }
+      else{
+         return false;
+      }
+   }
    return true;
 }
+
 bool CirMgr::readAIG(ifstream& fs){
+   for(unsigned j = 0; j < _aig; ++j){
+      string str;
+      getline(fs, str);
+      if(regex_match(str, regex("^[0-9]*[02468]+( )[0-9]+( )[0-9]+$"))){
+         string tok;
+         int i[3];
+         size_t pos = myStrGetTok(str, tok);
+         myStr2Int(tok, i[0]);
+         if(!checkLiteral(i[0], false)) return false;
+         pos = myStrGetTok(str, tok, pos);
+         myStr2Int(tok, i[1]);
+         myStrGetTok(str, tok, pos);
+         myStr2Int(tok, i[2]);
+         _all[i[0]/2] = new AndGate(i[0]/2, lineNo+1, i[1]/2, i[1]%2, i[2]/2, i[2]%2);
+         pa.push_back(tuple<unsigned, unsigned, unsigned>(i[0]/2, i[1]/2, i[2]/2));
+         ++lineNo;
+      }
+      else{
+         return false;
+      }
+   }
    return true;
 }
 bool CirMgr::readSymbol(ifstream& fs){
@@ -254,7 +357,15 @@ bool CirMgr::readComment(ifstream& fs){
    return true;
 }
 void CirMgr::clearRead(){
-   return;
+   _max = _input = _output = _aig = 0;
+   lineNo = colNo = 0;
+   for(size_t i = 1; i < _all.size(); ++i){
+      if(_all[i]) delete _all[i];
+   }
+   _all.resize(1);
+   pi.clear();
+   po.clear();
+   pa.clear();
 }
 
 /**********************************************************/
@@ -272,17 +383,32 @@ Circuit Statistics
 void
 CirMgr::printSummary() const
 {
+   cout << endl;
+   cout << "Circuit Statistics" << endl;
+   cout << "==================" << endl;
+   cout << "  PI" << setw(12) << pi.size() << endl;
+   cout << "  PO" << setw(12) << po.size() << endl;
+   cout << "  AIG" << setw(11) << pa.size() << endl;
+   cout << "------------------" << endl;
+   cout << "  Total" << setw(9) << pi.size()+po.size()+pa.size() << endl;
 }
 
 void
 CirMgr::printNetlist() const
 {
+   lineNo = 0;
+   cout << endl;
+   for(size_t i = 0; i < po.size(); ++i){
+      _all[_max+i+1]->printGate(lineNo);
+   }
 }
 
 void
 CirMgr::printPIs() const
 {
    cout << "PIs of the circuit:";
+   for(size_t i = 0; i < pi.size(); ++i)
+      cout << " " << pi[i];
    cout << endl;
 }
 
@@ -290,6 +416,8 @@ void
 CirMgr::printPOs() const
 {
    cout << "POs of the circuit:";
+   for(size_t i = 0; i < po.size(); ++i)
+      cout << " " << po[i].first;
    cout << endl;
 }
 
