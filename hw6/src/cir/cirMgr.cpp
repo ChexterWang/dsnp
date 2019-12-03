@@ -13,7 +13,9 @@
 #include <cassert>
 #include <cstring>
 #include <fstream>
+#include <sstream>
 #include <regex>
+#include <stack>
 #include "cirMgr.h"
 #include "util.h"
 
@@ -54,7 +56,7 @@ enum CirParseError {
 /**************************************/
 static unsigned lineNo = 0;  // in printint, lineNo needs to ++
 static unsigned colNo  = 0;  // in printing, colNo needs to ++
-static char buf[1024];
+// static char buf[1024];
 static string errMsg;
 static int errInt;
 static CirGate *errGate;
@@ -226,24 +228,20 @@ CirMgr::readCircuit(const string& fileName)
 
 bool CirMgr::readHeader(ifstream& fs){
    string str;
+   regex p("^(aag )[0-9]+( )[0-9]+( )[0-9]+( )[0-9]+( )[0-9]+$");
    getline(fs, str);
-   if(regex_match(str, regex("^(aag )[0-9]+( )[0-9]+( )[0-9]+( )[0-9]+( )[0-9]+$"))){
+   if(regex_match(str, p)){
       string tok;
-      int i;
       size_t pos = myStrGetTok(str, tok);
       pos = myStrGetTok(str, tok, pos);
-      myStr2Int(tok, i);
-      _max = unsigned(i);
+      _max = unsigned(stoi(tok));
       pos = myStrGetTok(str, tok, pos);
-      myStr2Int(tok, i);
-      _input = unsigned(i);
+      _input = unsigned(stoi(tok));
       pos = myStrGetTok(str, tok, pos);
       pos = myStrGetTok(str, tok, pos);
-      myStr2Int(tok, i);
-      _output = unsigned(i);
+      _output = unsigned(stoi(tok));
       pos = myStrGetTok(str, tok, pos);
-      myStr2Int(tok, i);
-      _aig = unsigned(i);
+      _aig = unsigned(stoi(tok));
       if(_max >= _input + _aig){
          _all.resize(_max+_output+1);
          lineNo = 1;
@@ -284,14 +282,14 @@ bool CirMgr::checkLiteral(int i, bool out){
 }
 
 bool CirMgr::readInput(ifstream& fs){
+   string str, tok;
+   int i;
+   regex p("^[0-9]*[02468]+$");
    for(unsigned j = 0; j < _input; ++j){
-      string str;
       getline(fs, str);
-      if(regex_match(str, regex("^[0-9]*[02468]+$"))){
-         string tok;
-         int i;
+      if(regex_match(str, p)){
          myStrGetTok(str, tok);
-         myStr2Int(tok, i);
+         i = stoi(tok);
          if(!checkLiteral(i, false)) return false;
          i /= 2;
          _all[i] = new PiGate(i, lineNo+1);
@@ -306,14 +304,14 @@ bool CirMgr::readInput(ifstream& fs){
 }
 
 bool CirMgr::readOutput(ifstream& fs){
+   string str, tok;
+   int i;
+   regex p("^[0-9]+$");
    for(unsigned j = 0; j < _output; ++j){
-      string str;
       getline(fs, str);
-      if(regex_match(str, regex("^[0-9]+$"))){
-         string tok;
-         int i;
+      if(regex_match(str, p)){
          myStrGetTok(str, tok);
-         myStr2Int(tok, i);
+         i = stoi(tok);
          if(!checkLiteral(i, true)) return false;
          _all[_max+j+1] = new PoGate(_max+j+1, lineNo+1, i/2, i%2);
          po.push_back(pair<unsigned, unsigned>(_max+j+1, i/2));
@@ -326,20 +324,35 @@ bool CirMgr::readOutput(ifstream& fs){
    return true;
 }
 
+void CirMgr::connectOut(){
+   CirGate* p = 0;
+   for(size_t i = 0; i < po.size(); ++i){
+      p = getGate(po[i].second);
+      if(p) p->addOut(po[i].first);
+   }
+   for(size_t i = 0; i < pa.size(); ++i){
+      p = getGate(get<1>(pa[i]));
+      if(p) p->addOut(get<0>(pa[i]));
+      p = getGate(get<2>(pa[i]));
+      if(p) p->addOut(get<0>(pa[i]));
+   }
+}
+
 bool CirMgr::readAIG(ifstream& fs){
+   string str, tok;
+   int i[3];
+   size_t pos = 0;
+   regex p("^[0-9]*[02468]+( )[0-9]+( )[0-9]+$");
    for(unsigned j = 0; j < _aig; ++j){
-      string str;
       getline(fs, str);
-      if(regex_match(str, regex("^[0-9]*[02468]+( )[0-9]+( )[0-9]+$"))){
-         string tok;
-         int i[3];
-         size_t pos = myStrGetTok(str, tok);
-         myStr2Int(tok, i[0]);
+      if(regex_match(str, p)){
+         pos = myStrGetTok(str, tok);
+         i[0] = stoi(tok);
          if(!checkLiteral(i[0], false)) return false;
          pos = myStrGetTok(str, tok, pos);
-         myStr2Int(tok, i[1]);
+         i[1] = stoi(tok);
          myStrGetTok(str, tok, pos);
-         myStr2Int(tok, i[2]);
+         i[2] = stoi(tok);
          _all[i[0]/2] = new AndGate(i[0]/2, lineNo+1, i[1]/2, i[1]%2, i[2]/2, i[2]%2);
          pa.push_back(tuple<unsigned, unsigned, unsigned>(i[0]/2, i[1]/2, i[2]/2));
          ++lineNo;
@@ -348,6 +361,7 @@ bool CirMgr::readAIG(ifstream& fs){
          return false;
       }
    }
+   connectOut();
    return true;
 }
 bool CirMgr::readSymbol(ifstream& fs){
@@ -396,10 +410,39 @@ CirMgr::printSummary() const
 void
 CirMgr::printNetlist() const
 {
+   for(size_t i = 0; i < _all.size(); ++i){
+      if(_all[i]) _all[i]->setVisited(false);
+   }
    lineNo = 0;
    cout << endl;
+   stringstream ss;
+   stack<CirGate*> s;
+   CirGate* current;
+   unsigned j = 0;
    for(size_t i = 0; i < po.size(); ++i){
-      _all[_max+i+1]->printGate(lineNo);
+      s.push(_all[_max+i+1]);
+      while(s.size()){
+         current = s.top();
+         j = current->haveChild();
+         switch(j){
+            case 0:
+               ss.str("");
+               current->printGate(lineNo, ss);
+               s.pop();
+               break;
+            case 3:
+               s.push(getGate((*current)[1]));
+               s.push(getGate((*current)[0]));
+               break;
+            case 2:
+               s.push(getGate((*current)[1]));
+               break;
+            case 1:
+               s.push(getGate((*current)[0]));
+               break;
+            default: break;
+         }
+      }
    }
 }
 
@@ -421,9 +464,36 @@ CirMgr::printPOs() const
    cout << endl;
 }
 
+void CirMgr::findFloat(){
+   for(size_t i = 0; i < _max + _output + 1; ++i){
+      if(_all[i]){
+         if(!_all[i]->haveParent()) flout.push_back(i);
+         if(_all[i]->haveFloatIn()) floin.push_back(i);
+      }
+   }
+}
+
 void
-CirMgr::printFloatGates() const
+CirMgr::printFloatGates()
 {
+   if(!_sorted){
+      findFloat();
+      sort(floin.begin(), floin.end());
+      sort(flout.begin(), flout.end());
+      _sorted = true;
+   }
+   if(floin.size()){
+      cout << "Gates with floating fanin(s):";
+      for(size_t i = 0; i < floin.size(); ++i)
+         cout << " " << floin[i];
+      cout << endl;
+   }
+   if(flout.size()){
+      cout << "Gates defined but not used  :";
+      for(size_t i = 0; i < flout.size(); ++i)
+         cout << " " << flout[i];
+      cout << endl;
+   }
 }
 
 void

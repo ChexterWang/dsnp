@@ -36,17 +36,22 @@ public:
    string getTypeStr() const;
    GateType getType() const { return _type; }
    unsigned getLineNo() const { return _lineNo; }
+   bool getVisited() const { return _visited; }
+   bool haveParent() const;
+   unsigned haveChild() const;
+   bool haveFloatIn() const;
+   unsigned operator [] (unsigned i) const { return _fanin[i].first; }
 
    // Printing functions
-   virtual void printGate(unsigned& line){}
+   virtual void getFloatIn(stringstream& ss){}
+   virtual void printGate(unsigned& line, stringstream& ss){}
    void reportGate() const;
    void reportFanin(int level) const;
    void reportFanout(int level) const;
 
    void setSymbol(string str){ _sb = str; }
-
-   unsigned operator [] (unsigned i){ return _fanin[i].first; }
-   unsigned operator [] (unsigned i) const { return _fanin[i].first; }
+   void setVisited(bool b){ _visited = b; }
+   void addOut(unsigned i){ _fanout.push_back(move(i)); };
 
 private:
 
@@ -56,6 +61,8 @@ protected:
    bool _visited = false;
    string _sb = "";
    vector<pair<unsigned, bool> > _fanin;
+   vector<unsigned> _fanout;
+
 };
 
 class PiGate: public CirGate
@@ -63,7 +70,8 @@ class PiGate: public CirGate
 public:
    PiGate(unsigned id, unsigned line): CirGate(id, line, PI_GATE){}
    ~PiGate(){}
-   void printGate(unsigned& line);
+   void printGate(unsigned& line, stringstream& ss);
+   void getFloatIn(stringstream& ss){ if(!_visited) _visited = true; }
 private:
 
 };
@@ -74,7 +82,8 @@ public:
    PoGate(unsigned id, unsigned line, unsigned in, bool inv):
    CirGate(id, line, PO_GATE){ _fanin.push_back(pair<unsigned, bool>(in, inv)); }
    ~PoGate(){}
-   void printGate(unsigned& line);
+   void printGate(unsigned& line, stringstream& ss);
+   void getFloatIn(stringstream& ss);
 private:
 
 };
@@ -86,7 +95,9 @@ public:
       _fanin.push_back(pair<unsigned, bool>(in0, inv0));
       _fanin.push_back(pair<unsigned, bool>(in1, inv1));
    }
-   void printGate(unsigned& line);
+   void printGate(unsigned& line, stringstream& ss);
+   void getFloatIn(stringstream& ss);
+   bool inDangling();
 private:
 
 };
@@ -96,7 +107,8 @@ class ConstGate: public CirGate
 public:
    ConstGate(unsigned id): CirGate(id, 0, CONST_GATE){}
    ~ConstGate(){}
-   void printGate(unsigned& line);
+   void printGate(unsigned& line, stringstream& ss);
+   void getFloatIn(stringstream& ss){ if(!_visited) _visited = true; }
 };
 
 #endif // CIR_GATE_H

@@ -49,14 +49,15 @@ public:
    void printNetlist() const;
    void printPIs() const;
    void printPOs() const;
-   void printFloatGates() const;
+   void printFloatGates();
    void writeAag(ostream&) const;
 
    friend ostream& operator << (ostream& os, CirMgr& cm);
 
 private:
+   bool _sorted = false;
    unsigned _max = 0,  _input = 0, _output = 0, _aig = 0;
-   vector<unsigned> pi;
+   vector<unsigned> pi, floin, flout;
    vector<pair<unsigned, unsigned> > po;
    vector<tuple<unsigned,unsigned,unsigned> > pa;
    vector<CirGate*> _all;
@@ -64,9 +65,11 @@ private:
    bool checkLiteral(int i, bool out);
    bool readInput(ifstream& fs);
    bool readOutput(ifstream& fs);
+   void connectOut();
    bool readAIG(ifstream& fs);
    bool readSymbol(ifstream& fs);
    bool readComment(ifstream& fs);
+   void findFloat();
    void clearRead();
 };
 

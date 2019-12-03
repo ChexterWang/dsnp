@@ -53,9 +53,8 @@ void CirGate::reportFanout(int level) const {
    assert (level >= 0);
 }
 
-void PiGate::printGate(unsigned& line){
+void PiGate::printGate(unsigned& line, stringstream& ss){
    if(!_visited){
-      stringstream ss;
       ss << "[" << line << "] " << "PI  " << _id;
       if(_sb.compare("")) ss << " (" << _sb << ")";
       cout << ss.str() << endl;
@@ -64,10 +63,7 @@ void PiGate::printGate(unsigned& line){
    }
 }
 
-void PoGate::printGate(unsigned& line){
-   CirGate* p = cirMgr->getGate(_fanin[0].first);
-   if(p) p->printGate(line);
-   stringstream ss;
+void PoGate::printGate(unsigned& line, stringstream& ss){
    ss << "[" << line << "] " << "PO  " << _id << " ";
    if(!cirMgr->getGate(_fanin[0].first)) ss << "*";
    if(_fanin[0].second) ss << "!";
@@ -77,13 +73,8 @@ void PoGate::printGate(unsigned& line){
    ++line;
 }
 
-void AndGate::printGate(unsigned& line){
-   CirGate* p = cirMgr->getGate(_fanin[0].first);
-   if(p) p->printGate(line);
-   p = cirMgr->getGate(_fanin[1].first);
-   if(p) p->printGate(line);
+void AndGate::printGate(unsigned& line, stringstream& ss){
    if(!_visited){
-      stringstream ss;
       ss << "[" << line << "] " << "AIG " << _id << " ";
       if(!cirMgr->getGate(_fanin[0].first)) ss << "*";
       if(_fanin[0].second) ss << "!";
@@ -98,10 +89,76 @@ void AndGate::printGate(unsigned& line){
    }
 }
 
-void ConstGate::printGate(unsigned& line){
+void ConstGate::printGate(unsigned& line, stringstream& ss){
    if(!_visited){
       cout << "[" << line << "] " << "CONST0" << endl;
       _visited = true;
       ++line;
    }
+}
+
+bool CirGate::haveParent() const {
+   switch(_type){
+      case PI_GATE:
+      case AIG_GATE: return (_fanout.size())?true:false;
+      default: return true;
+   }
+}
+
+unsigned CirGate::haveChild() const {
+   switch(_type){
+      case PO_GATE:{
+         CirGate* p = cirMgr->getGate(_fanin[0].first);
+         if(p && !p->_visited) return 1;
+         else return 0;
+      }
+      case AIG_GATE:{
+         CirGate* p = cirMgr->getGate(_fanin[0].first);
+         CirGate* q = cirMgr->getGate(_fanin[1].first);
+         if(p && !p->_visited){
+            if(q && !q->_visited) return 3;
+            else return 1;
+         }
+         else if(q && !q->_visited) return 2;
+         else return 0;
+      }
+      default: return 0;
+   }
+}
+
+bool CirGate::haveFloatIn() const {
+   switch(_type){
+      case PO_GATE:
+         return (!cirMgr->getGate(_fanin[0].first))?true:false;
+      case AIG_GATE:
+         return (!cirMgr->getGate(_fanin[0].first) ||
+                 !cirMgr->getGate(_fanin[1].first))?true:false;
+      default: return false;
+   }
+}
+
+void PoGate::getFloatIn(stringstream& ss){
+   CirGate* p = cirMgr->getGate(_fanin[0].first);
+   if(p) p->getFloatIn(ss);
+   else ss << _id << " ";
+   if(!_visited) _visited = true;
+}
+
+void AndGate::getFloatIn(stringstream& ss){
+   if(!_visited){
+      bool appended = false;
+      CirGate* p = cirMgr->getGate(_fanin[0].first);
+      if(p) p->getFloatIn(ss);
+      else{ ss << _id << " "; appended = true; }
+      p = cirMgr->getGate(_fanin[1].first);
+      if(p) p->getFloatIn(ss);
+      else if(!appended) ss << _id << " ";
+      _visited = true;
+   }
+}
+
+bool AndGate::inDangling(){
+   if(!cirMgr->getGate(_fanin[0].first)) return true;
+   if(!cirMgr->getGate(_fanin[1].first)) return true;
+   return false;
 }
