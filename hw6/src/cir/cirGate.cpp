@@ -11,6 +11,8 @@
 #include <sstream>
 #include <stdarg.h>
 #include <cassert>
+#include <stack>
+#include <tuple>
 #include "cirGate.h"
 #include "cirMgr.h"
 #include "util.h"
@@ -36,17 +38,52 @@ string CirGate::getTypeStr() const {
 
 void CirGate::reportGate() const{
    stringstream ss;
-   cout << "==================================================" << endl;
+   cout << "==================================================" << '\n';
    cout << "= " << setw(47) << left;
    ss << getTypeStr() << "(" << _id << ")";
    if(_sb.compare("")) ss << "\"" << _sb << "\"";
    ss << ", line " << _lineNo;
-   cout << ss.str() << "=" << endl;
-   cout << "==================================================" << endl;
+   cout << ss.str() << "=" << '\n';
+   cout << "==================================================" << '\n';
+}
+
+ostream& operator << (ostream& os, CirGate& cg){
+   os << cg.getTypeStr() << " " << cg.getId();
+   return os;
 }
 
 void CirGate::reportFanin(int level) const {
    assert (level >= 0);
+   cirMgr->setVisited(false);
+   stack<tuple<CirGate*, bool, unsigned> > s;
+   tuple<CirGate*, bool, unsigned> t;
+   CirGate* p;
+   unsigned i = 0;
+   s.push(tuple<CirGate*, bool, unsigned>(cirMgr->getGate(_id), false, (unsigned)0));
+   while(s.size()){
+      t = s.top();
+      p = get<0>(t);
+      i = get<2>(t);
+      s.pop();
+      if(i) cout << setw(i*2) << ' ';
+      if(get<1>(t)) cout << '!';
+      cout << *p;
+      if((i < (unsigned) level) && !p->getVisited()){
+         switch(p->haveChild()){
+            case 3:
+               s.push(tuple<CirGate*, bool, unsigned>(cirMgr->getGate((*p)[1]), p->invChild(1), (unsigned)(i+1)));
+               s.push(tuple<CirGate*, bool, unsigned>(cirMgr->getGate((*p)[0]), p->invChild(0), (unsigned)(i+1)));
+            case 2:
+               s.push(tuple<CirGate*, bool, unsigned>(cirMgr->getGate((*p)[1]), p->invChild(1), (unsigned)(i+1)));
+            case 1:
+               s.push(tuple<CirGate*, bool, unsigned>(cirMgr->getGate((*p)[0]), p->invChild(0), (unsigned)(i+1)));
+            default: break;
+         }
+      }
+      else if(p->getVisited()) cout << " (*)";
+      cout << '\n';
+      p->setVisited(true);
+   }
 }
 
 void CirGate::reportFanout(int level) const {
@@ -57,7 +94,7 @@ void PiGate::printGate(unsigned& line, stringstream& ss){
    if(!_visited){
       ss << "[" << line << "] " << "PI  " << _id;
       if(_sb.compare("")) ss << " (" << _sb << ")";
-      cout << ss.str() << endl;
+      cout << ss.str() << '\n';
       _visited = true;
       ++line;
    }
@@ -69,7 +106,7 @@ void PoGate::printGate(unsigned& line, stringstream& ss){
    if(_fanin[0].second) ss << "!";
    ss << _fanin[0].first;
    if(_sb.compare("")) ss << " (" << _sb << ")";
-   cout << ss.str() << endl;
+   cout << ss.str() << '\n';
    ++line;
 }
 
@@ -83,7 +120,7 @@ void AndGate::printGate(unsigned& line, stringstream& ss){
       if(_fanin[1].second) ss << "!";
       ss << _fanin[1].first;
       if(_sb.compare("")) ss << " (" << _sb << ")";
-      cout << ss.str() << endl;
+      cout << ss.str() << '\n';
       _visited = true;
       ++line;
    }
@@ -91,7 +128,7 @@ void AndGate::printGate(unsigned& line, stringstream& ss){
 
 void ConstGate::printGate(unsigned& line, stringstream& ss){
    if(!_visited){
-      cout << "[" << line << "] " << "CONST0" << endl;
+      cout << "[" << line << "] " << "CONST0" << '\n';
       _visited = true;
       ++line;
    }
@@ -155,10 +192,4 @@ void AndGate::getFloatIn(stringstream& ss){
       else if(!appended) ss << _id << " ";
       _visited = true;
    }
-}
-
-bool AndGate::inDangling(){
-   if(!cirMgr->getGate(_fanin[0].first)) return true;
-   if(!cirMgr->getGate(_fanin[1].first)) return true;
-   return false;
 }

@@ -22,6 +22,17 @@ using namespace std;
 
 extern CirMgr *cirMgr;
 
+enum readState{
+   OPEN,
+   HEADER,
+   INPUT,
+   OUTPUT,
+   AIG,
+   SYMBOL,
+   COMMENT,
+   ERROR
+};
+
 // TODO: Define your own data members and member functions
 class CirMgr
 {
@@ -53,6 +64,7 @@ public:
    void writeAag(ostream&) const;
 
    friend ostream& operator << (ostream& os, CirMgr& cm);
+   void setVisited(bool b) const;
 
 private:
    bool _sorted = false;
@@ -62,7 +74,7 @@ private:
    vector<tuple<unsigned,unsigned,unsigned> > pa;
    vector<CirGate*> _all;
    bool readHeader(ifstream& fs);
-   bool checkLiteral(int i, bool out);
+   bool checkLiteral(int i, readState s);
    bool readInput(ifstream& fs);
    bool readOutput(ifstream& fs);
    void connectOut();

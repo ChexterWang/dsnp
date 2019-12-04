@@ -36,11 +36,13 @@ public:
    string getTypeStr() const;
    GateType getType() const { return _type; }
    unsigned getLineNo() const { return _lineNo; }
+   unsigned getId() const { return _id; }
    bool getVisited() const { return _visited; }
    bool haveParent() const;
    unsigned haveChild() const;
    bool haveFloatIn() const;
    unsigned operator [] (unsigned i) const { return _fanin[i].first; }
+   bool invChild(unsigned i) const { return _fanin[i].second; }
 
    // Printing functions
    virtual void getFloatIn(stringstream& ss){}
@@ -48,6 +50,7 @@ public:
    void reportGate() const;
    void reportFanin(int level) const;
    void reportFanout(int level) const;
+   friend ostream& operator << (ostream& os, CirGate& cg);
 
    void setSymbol(string str){ _sb = str; }
    void setVisited(bool b){ _visited = b; }
@@ -97,7 +100,6 @@ public:
    }
    void printGate(unsigned& line, stringstream& ss);
    void getFloatIn(stringstream& ss);
-   bool inDangling();
 private:
 
 };

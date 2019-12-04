@@ -67,122 +67,111 @@ parseError(CirParseError err)
    switch (err) {
       case EXTRA_SPACE:
          cerr << "[ERROR] Line " << lineNo+1 << ", Col " << colNo+1
-              << ": Extra space character is detected!!" << endl;
+              << ": Extra space character is detected!!" << '\n';
          break;
       case MISSING_SPACE:
          cerr << "[ERROR] Line " << lineNo+1 << ", Col " << colNo+1
-              << ": Missing space character!!" << endl;
+              << ": Missing space character!!" << '\n';
          break;
       case ILLEGAL_WSPACE: // for non-space white space character
          cerr << "[ERROR] Line " << lineNo+1 << ", Col " << colNo+1
               << ": Illegal white space char(" << errInt
-              << ") is detected!!" << endl;
+              << ") is detected!!" << '\n';
          break;
       case ILLEGAL_NUM:
          cerr << "[ERROR] Line " << lineNo+1 << ": Illegal "
-              << errMsg << "!!" << endl;
+              << errMsg << "!!" << '\n';
          break;
       case ILLEGAL_IDENTIFIER:
          cerr << "[ERROR] Line " << lineNo+1 << ": Illegal identifier \""
-              << errMsg << "\"!!" << endl;
+              << errMsg << "\"!!" << '\n';
          break;
       case ILLEGAL_SYMBOL_TYPE:
          cerr << "[ERROR] Line " << lineNo+1 << ", Col " << colNo+1
-              << ": Illegal symbol type (" << errMsg << ")!!" << endl;
+              << ": Illegal symbol type (" << errMsg << ")!!" << '\n';
          break;
       case ILLEGAL_SYMBOL_NAME:
          cerr << "[ERROR] Line " << lineNo+1 << ", Col " << colNo+1
               << ": Symbolic name contains un-printable char(" << errInt
-              << ")!!" << endl;
+              << ")!!" << '\n';
          break;
       case MISSING_NUM:
          cerr << "[ERROR] Line " << lineNo+1 << ", Col " << colNo+1
-              << ": Missing " << errMsg << "!!" << endl;
+              << ": Missing " << errMsg << "!!" << '\n';
          break;
       case MISSING_IDENTIFIER:
          cerr << "[ERROR] Line " << lineNo+1 << ": Missing \""
-              << errMsg << "\"!!" << endl;
+              << errMsg << "\"!!" << '\n';
          break;
       case MISSING_NEWLINE:
          cerr << "[ERROR] Line " << lineNo+1 << ", Col " << colNo+1
-              << ": A new line is expected here!!" << endl;
+              << ": A new line is expected here!!" << '\n';
          break;
       case MISSING_DEF:
          cerr << "[ERROR] Line " << lineNo+1 << ": Missing " << errMsg
-              << " definition!!" << endl;
+              << " definition!!" << '\n';
          break;
       case CANNOT_INVERTED:
          cerr << "[ERROR] Line " << lineNo+1 << ", Col " << colNo+1
               << ": " << errMsg << " " << errInt << "(" << errInt/2
-              << ") cannot be inverted!!" << endl;
+              << ") cannot be inverted!!" << '\n';
          break;
       case MAX_LIT_ID:
          cerr << "[ERROR] Line " << lineNo+1 << ", Col " << colNo+1
               << ": Literal \"" << errInt << "\" exceeds maximum valid ID!!"
-              << endl;
+              << '\n';
          break;
       case REDEF_GATE:
          cerr << "[ERROR] Line " << lineNo+1 << ": Literal \"" << errInt
               << "\" is redefined, previously defined as "
               << errGate->getTypeStr() << " in line " << errGate->getLineNo()
-              << "!!" << endl;
+              << "!!" << '\n';
          break;
       case REDEF_SYMBOLIC_NAME:
          cerr << "[ERROR] Line " << lineNo+1 << ": Symbolic name for \""
-              << errMsg << errInt << "\" is redefined!!" << endl;
+              << errMsg << errInt << "\" is redefined!!" << '\n';
          break;
       case REDEF_CONST:
          cerr << "[ERROR] Line " << lineNo+1 << ", Col " << colNo+1
-              << ": Cannot redefine constant (" << errInt << ")!!" << endl;
+              << ": Cannot redefine constant (" << errInt << ")!!" << '\n';
          break;
       case NUM_TOO_SMALL:
          cerr << "[ERROR] Line " << lineNo+1 << ": " << errMsg
-              << " is too small (" << errInt << ")!!" << endl;
+              << " is too small (" << errInt << ")!!" << '\n';
          break;
       case NUM_TOO_BIG:
          cerr << "[ERROR] Line " << lineNo+1 << ": " << errMsg
-              << " is too big (" << errInt << ")!!" << endl;
+              << " is too big (" << errInt << ")!!" << '\n';
          break;
       default: break;
    }
    return false;
 }
 
-enum readState{
-   OPEN,
-   HEADER,
-   INPUT,
-   OUTPUT,
-   AIG,
-   SYMBOL,
-   COMMENT,
-   ERROR
-};
-
 ostream& operator << (ostream& os, CirMgr& cm){
    os << cm._max << ", " << cm._input << ", " <<
-   cm._output << ", " << cm._aig << endl;
+   cm._output << ", " << cm._aig << '\n';
    if(cm.pi.size()){
       os << cm.pi[0];
       for(size_t i = 1; i < cm.pi.size(); ++i)
          os << ", " << cm.pi[i];
-      os << endl;
+      os << '\n';
    }
    if(cm.po.size()){
       os << "PO: <" << cm.po[0].first << ", " << cm.po[0].second << ">";
       for(size_t i = 1; i < cm.po.size(); ++i)
          os << ", <" << cm.po[i].first << ", " << cm.po[i].second << ">";
-      os << endl;
+      os << '\n';
    }
    if(cm.pa.size()){
       os << "PA: <" << get<0>(cm.pa[0]) << ", " << get<1>(cm.pa[0]) << ", " << get<2>(cm.pa[0]) << ">";
       for(size_t i = 1; i < cm.pa.size(); ++i)
          os << ", <" << get<0>(cm.pa[i]) << ", " << get<1>(cm.pa[i]) << ", " << get<2>(cm.pa[i]) << ">";
-      os << endl;
+      os << '\n';
    }
    for(size_t i = 0; i < cm._all.size(); ++i){
       if(cm._all[i]){
-         os << i << ", " << cm._all[i]->getTypeStr() << ", " << cm._all[i]->getLineNo() << endl;
+         os << i << ", " << cm._all[i]->getTypeStr() << ", " << cm._all[i]->getLineNo() << '\n';
       }
    }
    return os;
@@ -222,7 +211,7 @@ CirMgr::readCircuit(const string& fileName)
       if(s == COMMENT) break;
    }
    ifs.close();
-   // cout << *this << endl;
+   // cout << *this << '\n';
    return true;
 }
 
@@ -259,18 +248,28 @@ bool CirMgr::readHeader(ifstream& fs){
    }
 }
 
-bool CirMgr::checkLiteral(int i, bool out){
+bool CirMgr::checkLiteral(int i, readState s){
    if((unsigned)i > _max*2+1){
       colNo = 0;
       errMsg = "Number of variables";
       errInt = i;
       return parseError(MAX_LIT_ID);
    }
-   else if(!out){
+   else if(s != INPUT){
       if(!(i/2)){
          colNo = 0;
          errInt = i;
          return parseError(REDEF_CONST);
+      }
+      else if(i%2){
+         colNo = 0;
+         errInt = i;
+         switch(s){
+            case HEADER: errMsg = "PI"; break;
+            case OUTPUT: errMsg = "AIG gate"; break;
+            default: break;
+         }
+         return parseError(CANNOT_INVERTED);
       }
       else if(_all[i/2]){
          errInt = i;
@@ -284,13 +283,13 @@ bool CirMgr::checkLiteral(int i, bool out){
 bool CirMgr::readInput(ifstream& fs){
    string str, tok;
    int i;
-   regex p("^[0-9]*[02468]+$");
+   regex p("^[0-9]+$");
    for(unsigned j = 0; j < _input; ++j){
       getline(fs, str);
       if(regex_match(str, p)){
          myStrGetTok(str, tok);
          i = stoi(tok);
-         if(!checkLiteral(i, false)) return false;
+         if(!checkLiteral(i, HEADER)) return false;
          i /= 2;
          _all[i] = new PiGate(i, lineNo+1);
          pi.push_back(move(unsigned(i)));
@@ -312,7 +311,7 @@ bool CirMgr::readOutput(ifstream& fs){
       if(regex_match(str, p)){
          myStrGetTok(str, tok);
          i = stoi(tok);
-         if(!checkLiteral(i, true)) return false;
+         if(!checkLiteral(i, INPUT)) return false;
          _all[_max+j+1] = new PoGate(_max+j+1, lineNo+1, i/2, i%2);
          po.push_back(pair<unsigned, unsigned>(_max+j+1, i/2));
          ++lineNo;
@@ -342,13 +341,13 @@ bool CirMgr::readAIG(ifstream& fs){
    string str, tok;
    int i[3];
    size_t pos = 0;
-   regex p("^[0-9]*[02468]+( )[0-9]+( )[0-9]+$");
+   regex p("^[0-9]+( )[0-9]+( )[0-9]+$");
    for(unsigned j = 0; j < _aig; ++j){
       getline(fs, str);
       if(regex_match(str, p)){
          pos = myStrGetTok(str, tok);
          i[0] = stoi(tok);
-         if(!checkLiteral(i[0], false)) return false;
+         if(!checkLiteral(i[0], OUTPUT)) return false;
          pos = myStrGetTok(str, tok, pos);
          i[1] = stoi(tok);
          myStrGetTok(str, tok, pos);
@@ -397,24 +396,28 @@ Circuit Statistics
 void
 CirMgr::printSummary() const
 {
-   cout << endl;
-   cout << "Circuit Statistics" << endl;
-   cout << "==================" << endl;
-   cout << "  PI" << setw(12) << pi.size() << endl;
-   cout << "  PO" << setw(12) << po.size() << endl;
-   cout << "  AIG" << setw(11) << pa.size() << endl;
-   cout << "------------------" << endl;
-   cout << "  Total" << setw(9) << pi.size()+po.size()+pa.size() << endl;
+   cout << '\n';
+   cout << "Circuit Statistics" << '\n';
+   cout << "==================" << '\n';
+   cout << "  PI" << setw(12) << pi.size() << '\n';
+   cout << "  PO" << setw(12) << po.size() << '\n';
+   cout << "  AIG" << setw(11) << pa.size() << '\n';
+   cout << "------------------" << '\n';
+   cout << "  Total" << setw(9) << pi.size()+po.size()+pa.size() << '\n';
+}
+
+void CirMgr::setVisited(bool b) const {
+   for(size_t i = 0; i < _all.size(); ++i){
+      if(_all[i]) _all[i]->setVisited(b);
+   }
 }
 
 void
 CirMgr::printNetlist() const
 {
-   for(size_t i = 0; i < _all.size(); ++i){
-      if(_all[i]) _all[i]->setVisited(false);
-   }
+   setVisited(false);
    lineNo = 0;
-   cout << endl;
+   cout << '\n';
    stringstream ss;
    stack<CirGate*> s;
    CirGate* current;
@@ -452,7 +455,7 @@ CirMgr::printPIs() const
    cout << "PIs of the circuit:";
    for(size_t i = 0; i < pi.size(); ++i)
       cout << " " << pi[i];
-   cout << endl;
+   cout << '\n';
 }
 
 void
@@ -461,7 +464,7 @@ CirMgr::printPOs() const
    cout << "POs of the circuit:";
    for(size_t i = 0; i < po.size(); ++i)
       cout << " " << po[i].first;
-   cout << endl;
+   cout << '\n';
 }
 
 void CirMgr::findFloat(){
@@ -486,13 +489,13 @@ CirMgr::printFloatGates()
       cout << "Gates with floating fanin(s):";
       for(size_t i = 0; i < floin.size(); ++i)
          cout << " " << floin[i];
-      cout << endl;
+      cout << '\n';
    }
    if(flout.size()){
       cout << "Gates defined but not used  :";
       for(size_t i = 0; i < flout.size(); ++i)
          cout << " " << flout[i];
-      cout << endl;
+      cout << '\n';
    }
 }
 
