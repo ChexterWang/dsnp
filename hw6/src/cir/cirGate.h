@@ -38,11 +38,12 @@ public:
    unsigned getLineNo() const { return _lineNo; }
    unsigned getId() const { return _id; }
    bool getVisited() const { return _visited; }
-   bool haveParent() const;
+   unsigned numParent() const { return _fanout.size(); }
    unsigned haveChild() const;
    bool haveFloatIn() const;
    unsigned operator [] (unsigned i) const { return _fanin[i].first; }
    bool invChild(unsigned i) const { return _fanin[i].second; }
+   unsigned getParent(unsigned i) const { return _fanout[i]; }
 
    // Printing functions
    virtual void getFloatIn(stringstream& ss){}

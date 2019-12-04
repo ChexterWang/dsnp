@@ -70,17 +70,25 @@ void CirGate::reportFanin(int level) const {
       cout << *p;
       if((i < (unsigned) level) && !p->getVisited()){
          switch(p->haveChild()){
-            case 3:
+            case 4:
+            case 5:
+            case 7:
+            case 8:
                s.push(tuple<CirGate*, bool, unsigned>(cirMgr->getGate((*p)[1]), p->invChild(1), (unsigned)(i+1)));
                s.push(tuple<CirGate*, bool, unsigned>(cirMgr->getGate((*p)[0]), p->invChild(0), (unsigned)(i+1)));
+               break;
+            case 1:
             case 2:
                s.push(tuple<CirGate*, bool, unsigned>(cirMgr->getGate((*p)[1]), p->invChild(1), (unsigned)(i+1)));
-            case 1:
+               break;
+            case 3:
+            case 6:
                s.push(tuple<CirGate*, bool, unsigned>(cirMgr->getGate((*p)[0]), p->invChild(0), (unsigned)(i+1)));
+               break;
             default: break;
          }
       }
-      else if(p->getVisited()) cout << " (*)";
+      else if(p->getVisited() && p->getType()==AIG_GATE) cout << " (*)";
       cout << '\n';
       p->setVisited(true);
    }
@@ -88,6 +96,50 @@ void CirGate::reportFanin(int level) const {
 
 void CirGate::reportFanout(int level) const {
    assert (level >= 0);
+   cirMgr->setVisited(false);
+   stack<tuple<CirGate*, bool, unsigned> > s;
+   tuple<CirGate*, bool, unsigned> t;
+   CirGate *p, *q;
+   unsigned i = 0;
+   bool b = false;
+   s.push(tuple<CirGate*, bool, unsigned>(cirMgr->getGate(_id), false, (unsigned)0));
+   while(s.size()){
+      b = false;
+      t = s.top();
+      p = get<0>(t);
+      i = get<2>(t);
+      s.pop();
+      if(i) cout << setw(i*2) << ' ';
+      if(get<1>(t)) cout << '!';
+      cout << *p;
+      if((i < (unsigned) level) && !p->getVisited() && p->numParent()){
+         for(int k = (int)p->numParent()-1; k >= 0; --k){
+            q = cirMgr->getGate(p->getParent(k));
+            switch(q->haveChild()){
+               case 4:
+               case 5:
+               case 7:
+               case 8:
+                  if((*q)[0] == _id) b = q->invChild(0);
+                  else b = q->invChild(1);
+                  break;
+               case 1:
+               case 2:
+                  b = q->invChild(1);
+                  break;
+               case 3:
+               case 6:
+                  b = q->invChild(0);
+                  break;
+               default: break;
+            }
+            s.push(tuple<CirGate*, bool, unsigned>(q, b, (unsigned)(i+1)));
+         }
+      }
+      else if(p->getVisited() && p->getType()==AIG_GATE) cout << " (*)";
+      cout << '\n';
+      p->setVisited(true);
+   }
 }
 
 void PiGate::printGate(unsigned& line, stringstream& ss){
@@ -134,33 +186,17 @@ void ConstGate::printGate(unsigned& line, stringstream& ss){
    }
 }
 
-bool CirGate::haveParent() const {
-   switch(_type){
-      case PI_GATE:
-      case AIG_GATE: return (_fanout.size())?true:false;
-      default: return true;
-   }
-}
-
 unsigned CirGate::haveChild() const {
-   switch(_type){
-      case PO_GATE:{
-         CirGate* p = cirMgr->getGate(_fanin[0].first);
-         if(p && !p->_visited) return 1;
-         else return 0;
+   unsigned i[2]{0, 0};
+   CirGate* p = 0;
+   for(unsigned k = 0; k < _fanin.size(); ++k){
+      p = cirMgr->getGate(_fanin[k].first);
+      if(p){
+         i[k]++;
+         if(p->_visited) i[k]++;
       }
-      case AIG_GATE:{
-         CirGate* p = cirMgr->getGate(_fanin[0].first);
-         CirGate* q = cirMgr->getGate(_fanin[1].first);
-         if(p && !p->_visited){
-            if(q && !q->_visited) return 3;
-            else return 1;
-         }
-         else if(q && !q->_visited) return 2;
-         else return 0;
-      }
-      default: return 0;
    }
+   return 3*i[0]+i[1];
 }
 
 bool CirGate::haveFloatIn() const {

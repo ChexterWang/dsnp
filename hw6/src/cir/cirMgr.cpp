@@ -429,18 +429,23 @@ CirMgr::printNetlist() const
          j = current->haveChild();
          switch(j){
             case 0:
+            case 2:
+            case 6:
+            case 8:
                ss.str("");
                current->printGate(lineNo, ss);
                s.pop();
                break;
             case 3:
-               s.push(getGate((*current)[1]));
+            case 5:
                s.push(getGate((*current)[0]));
                break;
-            case 2:
+            case 1:
+            case 7:
                s.push(getGate((*current)[1]));
                break;
-            case 1:
+            case 4:
+               s.push(getGate((*current)[1]));
                s.push(getGate((*current)[0]));
                break;
             default: break;
@@ -470,7 +475,7 @@ CirMgr::printPOs() const
 void CirMgr::findFloat(){
    for(size_t i = 0; i < _max + _output + 1; ++i){
       if(_all[i]){
-         if(!_all[i]->haveParent()) flout.push_back(i);
+         if(!_all[i]->numParent()) flout.push_back(i);
          if(_all[i]->haveFloatIn()) floin.push_back(i);
       }
    }
