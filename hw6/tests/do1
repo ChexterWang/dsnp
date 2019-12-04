@@ -1,0 +1,9 @@
+cirr tests/01.aag
+usage
+cirp
+usage
+cirp -n
+usage
+cirg 8 -fanin 4
+usage
+q -f

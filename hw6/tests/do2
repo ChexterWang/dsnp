@@ -1,0 +1,8 @@
+usage
+cirr tests.fraig/test1.aag
+usage
+cirp -PO
+usage
+cirg 2339 -FANO 5
+usage
+q -f

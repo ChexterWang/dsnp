@@ -1,0 +1,54 @@
+cir> cirr tests/01.aag
+
+cir> usage
+Period time used : 0 seconds
+Total time used  : 0 seconds
+Total memory used: 0.3086 M Bytes
+
+cir> cirp
+
+Circuit Statistics
+==================
+  PI           2
+  PO           2
+  AIG          3
+------------------
+  Total        7
+
+cir> usage
+Period time used : 0 seconds
+Total time used  : 0 seconds
+Total memory used: 0.3203 M Bytes
+
+cir> cirp -n
+
+[0] PI  1 (x)
+[1] PI  2 (y)
+[2] AIG 6 1 2
+[3] AIG 7 !1 !2
+[4] AIG 3 !6 !7
+[5] PO  8 3 (s)
+[6] PO  9 6 (c)
+
+cir> usage
+Period time used : 0 seconds
+Total time used  : 0 seconds
+Total memory used: 0.3203 M Bytes
+
+cir> cirg 8 -fanin 4
+PO 8
+  AIG 3
+    !AIG 6
+      PI 1
+      PI 2
+    !AIG 7
+      !PI 1
+      !PI 2
+
+cir> usage
+Period time used : 0 seconds
+Total time used  : 0 seconds
+Total memory used: 0.3242 M Bytes
+
+cir> q -f
+
